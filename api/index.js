@@ -8,7 +8,7 @@ const app = express();
 const port = 5000;
 
 app.use(cors({
-  origin: process.env.BACKEND_URL,
+  origin: process.env.FRONT_URL,
   credentials: true
 }));
 app.use(express.json());
