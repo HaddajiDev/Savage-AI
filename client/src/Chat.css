@@ -1,0 +1,217 @@
+.chat-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 800px;
+    display: flex;
+    flex-direction: column;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    margin-top: 50px;
+    border-radius: 10px;
+    border: 3px solid #404040;
+    padding: 1px;
+}
+  
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  
+  .message {
+    margin: 15px 0;
+    padding: 12px 18px;
+    border-radius: 12px;
+    max-width: 80%;
+    animation: message-appear 0.3s ease-out;
+  }
+  
+  @keyframes message-appear {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .message.user {
+    background-color: #2b5278;
+    margin-left: auto;
+  }
+  
+  .message.ai {
+    background-color: #404040;
+    margin-right: auto;
+  }
+  
+  .message-content {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  .code-block-container {
+    position: relative;
+    margin: 15px 0;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #1e1e1e;
+    border-bottom: 1px solid #333;
+  }
+  
+  .language-tag {
+    color: #888;
+    font-size: 0.8em;
+    text-transform: uppercase;
+  }
+  
+  .copy-button {
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .copy-button:hover {
+    background: #444;
+  }
+  
+  .markdown-content {
+    line-height: 1.6;
+  }
+  
+  .markdown-content h1, .markdown-content h2, .markdown-content h3,
+  .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+    margin: 1em 0 0.5em;
+  }
+  
+  .markdown-content code {
+    background: rgba(255,255,255,0.1);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Fira Code', monospace;
+  }
+  
+  .chat-input {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    background: #2d2d2d;
+  }
+  
+  .chat-input input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    background: #333;
+    color: white;
+    font-size: 16px;
+  }
+  
+  .chat-input button {
+    padding: 12px 20px;
+    background: #4CAF50;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .chat-input button:disabled {
+    background: #666;
+    cursor: not-allowed;
+  }
+  
+  .message-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  
+  .action-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s;
+  }
+  
+  .copy-btn {
+    background: #838883;
+    color: white;
+  }
+  
+  .copy-btn:hover {
+    background: #7a7a7a;
+  }
+  
+  .regenerate-btn {
+    background: #838883;
+    color: white;
+  }
+  
+  .regenerate-btn:hover {
+    background: #7a7a7a;
+  }
+  
+  .regenerate-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+  }
+  
+  .thinking-indicator {
+    padding: 10px;
+    color: #888;
+  }
+  
+  .dot-flashing {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    animation: dotFlashing 1s infinite linear;
+  }
+  
+  .dot-flashing::before, .dot-flashing::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    animation: dotFlashing 1s infinite linear;
+  }
+  
+  .dot-flashing::before {
+    left: -15px;
+    animation-delay: 0s;
+  }
+  
+  .dot-flashing::after {
+    left: 15px;
+    animation-delay: 0.5s;
+  }
+  
+  @keyframes dotFlashing {
+    0% { background-color: #4CAF50; }
+    50%, 100% { background-color: rgba(76, 175, 80, 0.2); }
+  }
+
+  .disclaimer{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    color: #7a7a7a;
+    font-size: small;
+  }
