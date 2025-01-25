@@ -12,17 +12,30 @@ app.get('/health', (req, res) => {
 });
 
 const corsOptions = {
-  origin: [process.env.FRONT_URL],
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      process.env.FRONT_URL,
+      "https://savageai-front.vercel.app",
+      "http://localhost:3000"
+    ];
+    
+    console.log('Incoming origin:', origin); // Add this for debugging
+    console.log('Allowed origins:', allowedOrigins); // Add this for debugging
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 200
 };
 
-
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.options('*', cors(corsOptions)); 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
