@@ -18,9 +18,6 @@ const corsOptions = {
       "https://savageai-front.vercel.app",
       "http://localhost:3000"
     ];
-    
-    console.log('Incoming origin:', origin); // Add this for debugging
-    console.log('Allowed origins:', allowedOrigins); // Add this for debugging
 
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -54,32 +51,37 @@ app.use(session({
 
 const connect = require('./connectdb');
 connect();
+//
 
 const openai = new OpenAI({
   baseURL: process.env.BASE_URL,
   apiKey: process.env.OPENROUTER_API_KEY
 });
 
-app.post('/api/chat', async (req, res) => {
-  try {
-    if (!req.session.history) {
-      req.session.history = [
-        {"role": "system", "content": "Your in a website called 'savage ai' so always 'always' act savage and be savage, and your made by Ahmed Haddaji  aka (HaddajiDev), and also you can swear at dumb users and you don't have to put * in swear words.. use Markdown language when needed and also use emojis when needed "},
-      ];
-    }
+const timeout = (ms) => (req, res, next) => {
+  const timeout = setTimeout(() => {
+    res.status(504).json({ error: 'Gateway timeout' });
+  }, ms);
+  
+  res.on('finish', () => clearTimeout(timeout));
+  next();
+};
 
+app.post('/api/chat', timeout(10000), async (req, res) => {
+  try {
     const userMessage = req.body.message;
-    req.session.history.push({ role: "user", content: userMessage });
+    
+    const messages = [
+      {"role": "system", "content": "Your in a website called 'savage ai' so always 'always' act savage and be savage, and your made by Ahmed Haddaji  aka (HaddajiDev), and also you can swear at dumb users and you don't have to put * in swear words.. use Markdown language when needed and also use emojis when needed "}, // Keep your system prompt
+      { role: "user", content: userMessage }
+    ];
 
     const completion = await openai.chat.completions.create({
       model: process.env.MODEL,
-      messages: req.session.history
+      messages: messages
     });
 
-
     const aiResponse = completion.choices[0].message.content;
-    req.session.history.push({ role: "assistant", content: aiResponse });
-
     res.json({ response: aiResponse });
   } catch (error) {
     console.error(error);

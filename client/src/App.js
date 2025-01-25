@@ -11,11 +11,31 @@ function App() {
   axios.defaults.withCredentials = true;
   const auth = localStorage.getItem('token');
   const dispatch = useDispatch();
+
   useEffect(() => {
-    if(auth){
-      dispatch(currentUser());
-    }
-  }, [auth]);
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          if (!token.startsWith('bearer ')) {
+            console.error('Invalid token format');
+            localStorage.removeItem('token');
+            return;
+          }
+          
+          axios.defaults.headers.common.Authorization = token;
+          
+          await dispatch(currentUser()).unwrap();
+        } catch (error) {
+          console.error('Auth check failed:', error);
+          localStorage.removeItem('token');
+          delete axios.defaults.headers.common.Authorization;
+        }
+      }
+    };
+
+    checkAuth();
+  }, [dispatch]);
 
   return (
     <div className="app-container">
