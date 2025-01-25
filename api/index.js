@@ -32,44 +32,49 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { 
+    secure: true,
+  }
+}));
+
 const connect = require('./connectdb');
 connect();
-
 
 const openai = new OpenAI({
   baseURL: process.env.BASE_URL,
   apiKey: process.env.OPENROUTER_API_KEY
 });
 
-const timeout = (ms) => (req, res, next) => {
-  const timeout = setTimeout(() => {
-    res.status(504).json({ error: 'Gateway timeout' });
-  }, ms);
-  
-  res.on('finish', () => clearTimeout(timeout));
-  next();
-};
-
-app.post('/api/chat', timeout(10000), async (req, res) => {
+app.post('/api/chat', async (req, res) => {
   try {
+    if (!req.session.history) {
+      req.session.history = [
+        {"role": "system", "content": "Your in a website called 'savage ai' so always 'always' act savage and be savage, and your made by Ahmed Haddaji  aka (HaddajiDev), and also you can swear at dumb users and you don't have to put * in swear words.. use Markdown language when needed and also use emojis when needed "},
+      ];
+    }
+
     const userMessage = req.body.message;
-    
-    const messages = [
-      {"role": "system", "content": "Your in a website called 'savage ai' so always 'always' act savage and be savage, and your made by Ahmed Haddaji  aka (HaddajiDev), and also you can swear at dumb users and you don't have to put * in swear words.. use Markdown language when needed and also use emojis when needed "}, // Keep your system prompt
-      { role: "user", content: userMessage }
-    ];
+    req.session.history.push({ role: "user", content: userMessage });
 
     const completion = await openai.chat.completions.create({
       model: process.env.MODEL,
-      messages: messages
+      messages: req.session.history
     });
 
+
     const aiResponse = completion.choices[0].message.content;
+    req.session.history.push({ role: "assistant", content: aiResponse });
+
     res.json({ response: aiResponse });
   } catch (error) {
     console.error(error);
