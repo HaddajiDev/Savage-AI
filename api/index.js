@@ -5,14 +5,18 @@ const cors = require('cors');
 const { OpenAI } = require('openai');
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 const corsOptions = {
   origin: [process.env.FRONT_URL],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
+
+app.options('*', cors(corsOptions));
 
 app.use(cors(corsOptions));
 
