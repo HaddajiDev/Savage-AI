@@ -5,12 +5,7 @@ const BASE_URL = process.env.REACT_APP_LINK;
 
 export const userRegister = createAsyncThunk("user/register", async(user, {rejectWithValue})=>{
 	try {
-		let response = await axios.post(`${BASE_URL}/user/signup`, user, {
-			withCredentials: true,
-			headers: {
-				'Content-Type': 'application/json',
-			}
-		});
+		let response = await axios.post(`${BASE_URL}/user/signup`, user);
 		return await response.data;
 	} catch (error) {
 		console.log(error);
@@ -20,12 +15,7 @@ export const userRegister = createAsyncThunk("user/register", async(user, {rejec
 
 export const userLogin = createAsyncThunk("user/login", async(user, {rejectWithValue})=>{
 	try {
-		let response = await axios.post(`${BASE_URL}/user/login`, user, {
-			withCredentials: true,
-			headers: {
-				'Content-Type': 'application/json',
-			}			
-		});
+		let response = await axios.post(`${BASE_URL}/user/login`, user);
 		return response.data;
 	} catch (error) {
 		console.log(error);
@@ -38,9 +28,7 @@ export const currentUser = createAsyncThunk('user/current', async() => {
         let result = await axios.get(BASE_URL + '/user/current', {
             headers:{
                 Authorization: localStorage.getItem("token"),
-				'Content-Type': 'application/json'
-            },
-			withCredentials: true
+            }
         });
         return result.data;
     } catch (error) {
