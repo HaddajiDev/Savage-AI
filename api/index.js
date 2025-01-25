@@ -7,6 +7,10 @@ const { OpenAI } = require('openai');
 const app = express();
 const port = process.env.PORT || 5000;
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 const corsOptions = {
   origin: [process.env.FRONT_URL],
   credentials: true,
@@ -16,9 +20,9 @@ const corsOptions = {
   optionsSuccessStatus: 204
 };
 
-app.options('*', cors(corsOptions));
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -28,7 +32,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false }
+  cookie: { 
+    secure: true,
+    sameSite: 'none',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  }
 }));
 
 const connect = require('./connectdb');
