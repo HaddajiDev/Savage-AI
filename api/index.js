@@ -7,13 +7,19 @@ const { OpenAI } = require('openai');
 const app = express();
 const port = 5000;
 
-app.use(cors());
-  // origin: [process.env.FRONT_URL, process.env.BACKEND],
-  // credentials: true,
-  // methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  // allowedHeaders: ['Content-Type', 'Authorization']
+const corsOptions = {
+  origin: [process.env.FRONT_URL],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
