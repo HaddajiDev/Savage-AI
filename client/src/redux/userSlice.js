@@ -2,8 +2,6 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
 
 const BASE_URL = process.env.REACT_APP_LINK;
-axios.defaults.withCredentials = true;
-
 
 export const userRegister = createAsyncThunk("user/register", async(user, {rejectWithValue})=>{
 	try {
