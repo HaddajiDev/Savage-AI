@@ -38,20 +38,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: true,
-  cookie: { 
-    secure: true,
-    sameSite: 'none',
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  }
-}));
-
 const connect = require('./connectdb');
 connect();
-//
+
 
 const openai = new OpenAI({
   baseURL: process.env.BASE_URL,
