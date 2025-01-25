@@ -5,7 +5,7 @@ const URI = process.env.MONGO_URI;
 async function connect() {
     try {
         await mongoose.connect(URI, {
-            dbName: "Savage AI"
+            dbName: "SavageAI"
         })
     
         console.log("Connected to mongo");

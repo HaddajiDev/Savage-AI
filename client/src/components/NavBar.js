@@ -1,7 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '../App.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { userLogin, userRegister } from '../redux/userSlice';
 
 const Navbar = () => {
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const dispatch = useDispatch();
+  
+  const user = useSelector(state => state.user.user);
+
+  const [userSignUp, setUserSignUp] = useState({
+      email: "",
+      username: "",
+      password: "",
+  });
+
+  const [user_Login, setUser_Login] = useState({
+      email: "",    
+      password: "",
+  });
+
+  const handleLogin = () => {
+    dispatch(userLogin(user_Login));
+    setShowAuthModal(false);
+  }
+
+  const handleSignUp = () => {
+    dispatch(userRegister(userSignUp));
+    setShowAuthModal(false);
+  }
+
+  const handleAuthSubmit = (e) => {
+    e.preventDefault();
+    console.log(`${authMode} submitted`);
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-content">
@@ -16,10 +50,29 @@ const Navbar = () => {
           <span className="navbar-title">Savage AI</span>
         </div>
         <div className="navbar-right">
-          <button className="navbar-icon-btn" aria-label="GitHub Repository"><a style={{all: 'unset'}} href='https://github.com/HaddajiDev/Savage-AI' target='_blank'>
-            <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" height="20" width="20">
-              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-            </svg></a>
+        {!user ? (
+          <button 
+            className="navbar-signup-btn"
+            onClick={() => setShowAuthModal(true)}
+          >
+            Sign Up
+          </button>
+        ) : (
+          <div className="user-info">
+            <img 
+              className="user-avatar"
+              src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${user?.username}&flip=true&backgroundColor=0a5b83,1c799f,69d2e7,f1f4dc,f88c49,b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf&backgroundType=solid,gradientLinear&backgroundRotation=0,10,20&shapeColor=0a5b83,1c799f,69d2e7,f1f4dc,f88c49,transparent`}
+              alt="User avatar"
+            />
+            <span className="username">{user?.username}</span>
+          </div>
+        )}          
+          <button className="navbar-icon-btn" aria-label="GitHub Repository">
+            <a style={{all: 'unset'}} href='https://github.com/HaddajiDev/Savage-AI' target='_blank' rel="noreferrer">
+              <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" height="20" width="20">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+              </svg>
+            </a>
           </button>
           <button className="navbar-icon-btn" aria-label="Settings">
             <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" height="20" width="20">
@@ -29,6 +82,59 @@ const Navbar = () => {
           </button>
         </div>
       </div>
+
+      {showAuthModal && (
+        <div className="auth-modal-overlay" onClick={() => setShowAuthModal(false)}>
+          <div className="auth-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="auth-modal-header">
+              <button
+                className={`auth-tab ${authMode === 'login' ? 'active' : ''}`}
+                onClick={() => setAuthMode('login')}
+              >
+                Login
+              </button>
+              <button
+                className={`auth-tab ${authMode === 'signup' ? 'active' : ''}`}
+                onClick={() => setAuthMode('signup')}
+              >
+                Sign Up
+              </button>
+            </div>
+            
+            <form onSubmit={handleAuthSubmit} className="auth-form">
+              {authMode === 'signup' ? (
+                <>
+                <div className="form-group">
+                  <label>Username</label>
+                  <input type="text" required onChange={(e) => setUserSignUp({...userSignUp, username: e.target.value})}/>
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input type="email" required onChange={(e) => setUserSignUp({...userSignUp, email: e.target.value})}/>
+                </div>
+                <div className="form-group">
+                  <label>Password</label>
+                  <input type="password" required onChange={(e) => setUserSignUp({...userSignUp, password: e.target.value})}/>
+                </div>
+                </>
+              ) : (
+                <>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input type="email" required onChange={(e) => setUser_Login({...user_Login, email: e.target.value})}/>
+                </div>
+                <div className="form-group">
+                  <label>Password</label>
+                  <input type="password" required onChange={(e) => setUser_Login({...user_Login, password: e.target.value})}/>
+                </div>
+                </>
+              )}
+
+              {authMode === 'login' ? <button className="auth-submit-btn" onClick={handleLogin}>Login</button> : <button className="auth-submit-btn" onClick={handleSignUp}>Create Account</button>}
+            </form>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
