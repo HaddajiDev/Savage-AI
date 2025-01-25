@@ -11,6 +11,7 @@ app.use(cors({
   origin: process.env.FRONT_URL,
   credentials: true
 }));
+
 app.use(express.json());
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -18,6 +19,9 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false }
 }));
+
+const connect = require('./connectdb');
+connect();
 
 const openai = new OpenAI({
   baseURL: process.env.BASE_URL,
@@ -40,6 +44,7 @@ app.post('/api/chat', async (req, res) => {
       messages: req.session.history
     });
 
+
     const aiResponse = completion.choices[0].message.content;
     req.session.history.push({ role: "assistant", content: aiResponse });
 
@@ -49,6 +54,8 @@ app.post('/api/chat', async (req, res) => {
     res.status(500).json({ error: 'AI service error' });
   }
 });
+
+app.use('/user', require('./routes/user'));
 
 app.get("/", (req, res) => res.send("Working"));
 
