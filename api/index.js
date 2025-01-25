@@ -8,10 +8,12 @@ const app = express();
 const port = 5000;
 
 app.use(cors({
-  origin: [process.env.FRONT_URL, process.env.BACKEND],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: true,
+  credentials: true
+  // origin: [process.env.FRONT_URL, process.env.BACKEND],
+  // credentials: true,
+  // methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  // allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
