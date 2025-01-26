@@ -11,7 +11,7 @@ const connect = require('./connectdb');
 connect();
 
 app.use(cors({
-  origin: process.env.FRONT_URL,
+  origin: "*",
   credentials: true
 }));
 

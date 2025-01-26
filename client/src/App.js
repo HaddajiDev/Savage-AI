@@ -8,6 +8,10 @@ import { useEffect } from 'react';
 import axios from 'axios';
 
 function App() {
+
+  axios.defaults.withCredentials = false;
+  
+
   const auth = localStorage.getItem('token');
   const dispatch = useDispatch();
   useEffect(() => {
