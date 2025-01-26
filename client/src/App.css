@@ -244,3 +244,12 @@ body{
   gap: 0.5rem;
   align-items: center;
 }
+
+.wraning{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: red;
+  font-size: medium;
+  font-weight: bold;
+}

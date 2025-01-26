@@ -5,50 +5,23 @@ const cors = require('cors');
 const { OpenAI } = require('openai');
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = 5000;
 
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
+const connect = require('./connectdb');
+connect();
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      process.env.FRONT_URL,
-      "https://savageai-front.vercel.app",
-      "http://localhost:3000"
-    ];
-
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200
-};
-
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); 
+app.use(cors({
+  origin: process.env.FRONT_URL,
+  credentials: true
+}));
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
-  cookie: { 
-    secure: true,
-  }
+  cookie: { secure: false }
 }));
-
-const connect = require('./connectdb');
-connect();
 
 const openai = new OpenAI({
   baseURL: process.env.BASE_URL,
@@ -70,7 +43,6 @@ app.post('/api/chat', async (req, res) => {
       model: process.env.MODEL,
       messages: req.session.history
     });
-
 
     const aiResponse = completion.choices[0].message.content;
     req.session.history.push({ role: "assistant", content: aiResponse });

@@ -86,6 +86,8 @@ const Navbar = () => {
       {showAuthModal && (
         <div className="auth-modal-overlay" onClick={() => setShowAuthModal(false)}>
           <div className="auth-modal-content" onClick={(e) => e.stopPropagation()}>
+              <p className='wraning'>login and signup is not working at the moment</p>
+              <p className='wraning'>it work locally though</p>
             <div className="auth-modal-header">
               <button
                 className={`auth-tab ${authMode === 'login' ? 'active' : ''}`}
