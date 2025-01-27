@@ -1,5 +1,5 @@
 import logo from './logo.svg';
-import './App.css';
+import './css/App.css';
 import Chat from './components/Chat';
 import Navbar from './components/NavBar';
 import { useDispatch } from 'react-redux';

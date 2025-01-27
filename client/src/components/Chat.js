@@ -3,7 +3,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import '../Chat.css';
+import '../css/Chat.css';
 
 marked.setOptions({
   breaks: true,

@@ -1,0 +1,95 @@
+/* Profile Modal Styles */
+.profile-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .profile-modal-content.dark-theme {
+    background: #1a1a1a;
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 2rem;
+    width: 350px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  }
+  
+  .profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    border: 2px solid #3498db;
+  }
+  
+  .profile-info h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #f8f9fa;
+  }
+  
+  .profile-info .email {
+    margin: 0.25rem 0 0;
+    color: #adb5bd;
+    font-size: 0.9rem;
+  }
+  
+  .profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .action-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    background: none;
+  }
+  
+  .reset-password-btn {
+    background-color: #2c3e50;
+    color: #3498db;
+    border: 1px solid #3498db;
+  }
+  
+  .reset-password-btn:hover {
+    background-color: #34495e;
+  }
+  
+  .logout-btn {
+    background-color: #c0392b;
+    color: white;
+  }
+  
+  .logout-btn:hover {
+    background-color: #e74c3c;
+  }
+  
+  /* Dark theme adjustments */
+  .dark-theme input {
+    background-color: #2d2d2d;
+    color: #ffffff;
+    border-color: #404040;
+  }
+  
+  .dark-theme input:focus {
+    border-color: #3498db;
+    outline: none;
+  }

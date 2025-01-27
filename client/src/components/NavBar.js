@@ -1,39 +1,50 @@
 import React, { useState } from 'react';
-import '../App.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { userLogin, userRegister } from '../redux/userSlice';
+import { logout, userLogin, userRegister } from '../redux/userSlice';
+import '../css/App.css';
+import ProfileModal from './ProfileModal';
 
 const Navbar = () => {
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.user.user);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login');
-  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   
-  const user = useSelector(state => state.user.user);
-
-  const [userSignUp, setUserSignUp] = useState({
-      email: "",
-      username: "",
-      password: "",
+  const [signupData, setSignupData] = useState({
+    email: '',
+    username: '',
+    password: ''
   });
-
-  const [user_Login, setUser_Login] = useState({
-      email: "",    
-      password: "",
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
   });
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+  
+  const handleResetPassword = () => {
+    console.log('password reset');
+  };
 
-  const handleLogin = () => {
-    dispatch(userLogin(user_Login));
-    setShowAuthModal(false);
-  }
-
-  const handleSignUp = () => {
-    dispatch(userRegister(userSignUp));
-    setShowAuthModal(false);
-  }
-
-  const handleAuthSubmit = (e) => {
+  const handleAuthSubmit = async (e) => {
     e.preventDefault();
-    console.log(`${authMode} submitted`);
+    setIsLoading(true);
+    
+    try {
+      if (authMode === 'login') {
+        await dispatch(userLogin(loginData)).unwrap();
+      } else {
+        await dispatch(userRegister(signupData)).unwrap();
+      }
+      setShowAuthModal(false);
+    } catch (error) {
+      console.error('Authentication error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -49,24 +60,26 @@ const Navbar = () => {
           </div>
           <span className="navbar-title">Savage AI</span>
         </div>
+
         <div className="navbar-right">
-        {!user ? (
-          <button 
-            className="navbar-signup-btn"
-            onClick={() => setShowAuthModal(true)}
-          >
-            Sign Up
-          </button>
-        ) : (
-          <div className="user-info">
-            <img 
-              className="user-avatar"
-              src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${user?.username}&flip=true&backgroundColor=0a5b83,1c799f,69d2e7,f1f4dc,f88c49,b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf&backgroundType=solid,gradientLinear&backgroundRotation=0,10,20&shapeColor=0a5b83,1c799f,69d2e7,f1f4dc,f88c49,transparent`}
-              alt="User avatar"
-            />
-            <span className="username">{user?.username}</span>
-          </div>
-        )}          
+          {!user ? (
+            <button 
+              className="navbar-signup-btn"
+              onClick={() => setShowAuthModal(true)}
+            >
+              Sign Up
+            </button>
+          ) : (
+            <div className="user-info" onClick={() => setShowProfileModal(true)}>
+              <img 
+                className="user-avatar"
+                src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${user?.username}&flip=true&backgroundColor=0a5b83,1c799f,69d2e7,f1f4dc,f88c49,b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf&backgroundType=solid,gradientLinear&backgroundRotation=0,10,20&shapeColor=0a5b83,1c799f,69d2e7,f1f4dc,f88c49,transparent`}
+                alt="User avatar"
+              />
+              <span className="username">{user?.username}</span>
+            </div>
+          )}
+
           <button className="navbar-icon-btn" aria-label="GitHub Repository">
             <a style={{all: 'unset'}} href='https://github.com/HaddajiDev/Savage-AI' target='_blank' rel="noreferrer">
               <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" height="20" width="20">
@@ -74,6 +87,7 @@ const Navbar = () => {
               </svg>
             </a>
           </button>
+
           <button className="navbar-icon-btn" aria-label="Settings">
             <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" height="20" width="20">
               <circle cx="12" cy="12" r="3"></circle>
@@ -86,8 +100,6 @@ const Navbar = () => {
       {showAuthModal && (
         <div className="auth-modal-overlay" onClick={() => setShowAuthModal(false)}>
           <div className="auth-modal-content" onClick={(e) => e.stopPropagation()}>
-              <p className='wraning'>login and signup is not working at the moment</p>
-              <p className='wraning'>it work locally though</p>
             <div className="auth-modal-header">
               <button
                 className={`auth-tab ${authMode === 'login' ? 'active' : ''}`}
@@ -102,41 +114,82 @@ const Navbar = () => {
                 Sign Up
               </button>
             </div>
-            
+
             <form onSubmit={handleAuthSubmit} className="auth-form">
               {authMode === 'signup' ? (
                 <>
-                <div className="form-group">
-                  <label>Username</label>
-                  <input type="text" required onChange={(e) => setUserSignUp({...userSignUp, username: e.target.value})}/>
-                </div>
-                <div className="form-group">
-                  <label>Email</label>
-                  <input type="email" required onChange={(e) => setUserSignUp({...userSignUp, email: e.target.value})}/>
-                </div>
-                <div className="form-group">
-                  <label>Password</label>
-                  <input type="password" required onChange={(e) => setUserSignUp({...userSignUp, password: e.target.value})}/>
-                </div>
+                  <div className="form-group">
+                    <label>Username</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={signupData.username}
+                      onChange={(e) => setSignupData({...signupData, username: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input 
+                      type="email" 
+                      required 
+                      value={signupData.email}
+                      onChange={(e) => setSignupData({...signupData, email: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Password</label>
+                    <input 
+                      type="password" 
+                      required 
+                      value={signupData.password}
+                      onChange={(e) => setSignupData({...signupData, password: e.target.value})}
+                    />
+                  </div>
                 </>
               ) : (
                 <>
-                <div className="form-group">
-                  <label>Email</label>
-                  <input type="email" required onChange={(e) => setUser_Login({...user_Login, email: e.target.value})}/>
-                </div>
-                <div className="form-group">
-                  <label>Password</label>
-                  <input type="password" required onChange={(e) => setUser_Login({...user_Login, password: e.target.value})}/>
-                </div>
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input 
+                      type="email" 
+                      required 
+                      value={loginData.email}
+                      onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Password</label>
+                    <input 
+                      type="password" 
+                      required 
+                      value={loginData.password}
+                      onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                    />
+                  </div>
                 </>
               )}
 
-              {authMode === 'login' ? <button className="auth-submit-btn" onClick={handleLogin}>Login</button> : <button className="auth-submit-btn" onClick={handleSignUp}>Create Account</button>}
+              <button 
+                className="auth-submit-btn" 
+                type="submit" 
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="spinner" />
+                ) : authMode === 'login' ? 'Login' : 'Create Account'}
+              </button>
             </form>
           </div>
         </div>
       )}
+      {showProfileModal && (
+      <ProfileModal
+        user={user}
+        onClose={() => setShowProfileModal(false)}
+        onLogout={handleLogout}
+        onResetPassword={handleResetPassword}
+      />
+    )}
     </nav>
   );
 };
