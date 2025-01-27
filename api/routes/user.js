@@ -28,7 +28,7 @@ router.post("/signup", registerRules(), validation, async (request, result) => {
 		const payload = {
 			_id: res._id
 		}
-		const token = await jwt.sign(payload, process.env.SESSION_SECRET, {
+		const token = await jwt.sign(payload, process.env.JWT_SECRET, {
 			expiresIn: '7d'
 		});
         
@@ -62,7 +62,7 @@ router.post('/login', loginRules(), validation, async (request, result) => {
 		const payload = {
 			_id: searchedUser._id
 		}
-		const token = await jwt.sign(payload, process.env.SESSION_SECRET, {
+		const token = await jwt.sign(payload, process.env.JWT_SECRET, {
 			expiresIn: '7d'
 		});        
         result.status(200).send({ user: searchedUser, token: `bearer ${token}` });
