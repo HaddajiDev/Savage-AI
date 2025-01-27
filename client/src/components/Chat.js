@@ -4,6 +4,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import '../css/Chat.css';
+import { useSelector } from 'react-redux';
 
 marked.setOptions({
   breaks: true,
@@ -17,7 +18,7 @@ const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState(null);
   const messagesEndRef = useRef(null);
-
+  const user = useSelector(state => state.user.user);
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -101,7 +102,7 @@ const Chat = () => {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userMessage.content })
+          body: JSON.stringify({ message: userMessage.content + ` username : ${user?.username}` })
         });
 
         const data = await response.json();
@@ -151,7 +152,7 @@ const Chat = () => {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input })
+        body: JSON.stringify({ message: input + ` username : ${user?.username}`  })
       });
 
       const data = await response.json();
