@@ -28,8 +28,9 @@ router.post('/chat', async (req, res) => {
   
       res.json({ response: aiResponse });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'AI service error' });
+      const aiResponse = "sorry.. ai failed to generate response";
+      req.session.history.push({ role: "assistant", content: aiResponse });
+      res.json({ response: aiResponse });
     }
   });
 
