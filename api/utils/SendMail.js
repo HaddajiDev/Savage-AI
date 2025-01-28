@@ -22,10 +22,6 @@ const sendVerificationEmail = async (email, token) => {
               <h1 style="margin: 0; font-size: 24px;">Welcome to Savage AI!</h1>
             </header>
             <main style="padding: 20px;">
-              <p style="font-size: 16px; margin: 0 0 20px;">Hi there,</p>
-              <p style="font-size: 16px; margin: 0 0 20px;">
-                Please verify your email by clicking the button below:
-              </p>
               <p style="text-align: center; margin: 30px 0;">
                 <a href="${process.env.BACKEND}/user/api/signup?token=${token}" 
                    style="display: inline-block; background-color: #4CAF50; color: white; text-decoration: none; 
