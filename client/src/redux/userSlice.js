@@ -8,18 +8,23 @@ export const userRegister = createAsyncThunk("user/register", async(user, {rejec
 		let response = await axios.post(`${BASE_URL}/user/api/verify`, user);
 		return await response.data;
 	} catch (error) {
-		console.log(error);
-		return rejectWithValue(error.response.data)
+		const errorData = error.response?.data;
+        return rejectWithValue({
+            error: errorData?.error || 'Registration failed. Please try again.'
+        });
 	}
 });
+
 
 export const userLogin = createAsyncThunk("user/login", async(user, {rejectWithValue})=>{
 	try {
 		let response = await axios.post(`${BASE_URL}/user/login`, user);
 		return response.data;
 	} catch (error) {
-		console.log(error);
-		return rejectWithValue(error.response.data)
+		const errorData = error.response?.data;
+        return rejectWithValue({
+            error: errorData?.error || 'Login failed. Please try again.'
+        });
 	}
 });
 
@@ -58,6 +63,9 @@ export const userSlice = createSlice({
             localStorage.setItem("token", action.payload);
 			window.location.reload();
         },
+		clearError(state) {
+			state.error = null;
+		}
 
     },
     extraReducers: (builder) => {
@@ -99,6 +107,6 @@ export const userSlice = createSlice({
 })
 
 
-export const { logout, setToken } = userSlice.actions
+export const { logout, setToken, clearError } = userSlice.actions
 
 export default userSlice.reducer

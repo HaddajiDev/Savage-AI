@@ -273,3 +273,14 @@ body{
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+.auth-error-message {
+  color: #ff4444;
+  margin-bottom: 15px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  font-size: 14px;
+}

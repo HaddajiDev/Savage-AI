@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout, userLogin, userRegister } from '../redux/userSlice';
 import '../css/App.css';
 import ProfileModal from './ProfileModal';
+import { clearError } from '../redux/userSlice';
+
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -12,7 +14,8 @@ const Navbar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const token = localStorage.getItem("token");
-  
+  const error = useSelector(state => state.user.error);
+
   const [signupData, setSignupData] = useState({
     email: '',
     username: '',
@@ -36,17 +39,24 @@ const Navbar = () => {
     
     try {
       if (authMode === 'login') {
+        dispatch(clearError());
         await dispatch(userLogin(loginData)).unwrap();
+        
       } else {
+        dispatch(clearError());
         await dispatch(userRegister(signupData)).unwrap();
       }
-      setShowAuthModal(false);
     } catch (error) {
       console.error('Authentication error:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    dispatch(clearError());
+}
 
   return (
     <nav className="navbar">
@@ -99,7 +109,7 @@ const Navbar = () => {
       </div>
 
       {showAuthModal && (
-        <div className="auth-modal-overlay" onClick={() => setShowAuthModal(false)}>
+        <div className="auth-modal-overlay" onClick={() => closeAuthModal()}>
           <div className="auth-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="auth-modal-header">
               <button
@@ -184,8 +194,11 @@ const Navbar = () => {
                   <div className="spinner" />
                 ) : authMode === 'login' ? 'Login' : 'Create Account'}
               </button>
-            </form>
+            </form>            
+            {error && <div className="auth-error-message">{error}</div>}
           </div>
+          
+          
         </div>
       )}
       {showProfileModal && (

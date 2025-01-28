@@ -15,11 +15,11 @@ router.post("/api/verify", registerRules(), validation, async(request, result) =
 
         const search_username = await User.findOne({ username: request.body.username });
         if (search_username) {
-            return result.send({error :'username already exists'});
+            return result.status(400).send({error :'username already exists'});
         }
         const search_email = await User.findOne({ email: request.body.email });
         if (search_email) {
-            return result.send({error :'email already exists'});
+            return result.status(400).send({error :'email already exists'});
         }
 
         const salt = 10;
@@ -90,15 +90,14 @@ router.post('/login', loginRules(), validation, async (request, result) => {
 
         const searchedUser = await User.findOne({ email });
         if (!searchedUser) {
-            result.status(500).send({error: "User not found"});
+            result.status(400).send({error: "User not found"});
             return;
         }
-
-
+        
         const match = await bcrypt.compare(password, searchedUser.password);
 
         if (!match) {
-            result.status(500).send({error: "Invalid credentials"});
+            result.status(400).send({error: "Invalid credentials"});
             return;
         }       
 
