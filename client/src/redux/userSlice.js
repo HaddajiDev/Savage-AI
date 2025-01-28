@@ -5,7 +5,7 @@ const BASE_URL = process.env.REACT_APP_LINK;
 
 export const userRegister = createAsyncThunk("user/register", async(user, {rejectWithValue})=>{
 	try {
-		let response = await axios.post(`${BASE_URL}/user/signup`, user);
+		let response = await axios.post(`${BASE_URL}/user/api/verify`, user);
 		return await response.data;
 	} catch (error) {
 		console.log(error);
@@ -52,7 +52,13 @@ export const userSlice = createSlice({
 			state.user = null;
 			state.token = null;
 			window.location.reload();
-		}
+		},
+		setToken: (state, action) => {
+            state.token = action.payload;
+            localStorage.setItem("token", action.payload);
+			window.location.reload();
+        },
+
     },
     extraReducers: (builder) => {
 		builder
@@ -78,9 +84,7 @@ export const userSlice = createSlice({
 		})
 		.addCase(userRegister.fulfilled, (state, action) => {
 			state.status = "success";
-			state.user = action.payload.user;		
-			localStorage.setItem("token", action.payload.token);
-			window.location.reload();	
+			window.location.href = action.payload.redirectUrl;
 		})
 		.addCase(userRegister.rejected, (state, action) => {
 			state.status = "failed";
@@ -95,6 +99,6 @@ export const userSlice = createSlice({
 })
 
 
-export const { logout } = userSlice.actions
+export const { logout, setToken } = userSlice.actions
 
 export default userSlice.reducer

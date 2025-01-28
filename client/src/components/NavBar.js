@@ -122,7 +122,8 @@ const Navbar = () => {
                     <label>Username</label>
                     <input 
                       type="text" 
-                      required 
+                      required
+                      placeholder='username'
                       value={signupData.username}
                       onChange={(e) => setSignupData({...signupData, username: e.target.value})}
                     />
@@ -131,7 +132,8 @@ const Navbar = () => {
                     <label>Email</label>
                     <input 
                       type="email" 
-                      required 
+                      required
+                      placeholder='email (valid one)'
                       value={signupData.email}
                       onChange={(e) => setSignupData({...signupData, email: e.target.value})}
                     />
@@ -140,6 +142,7 @@ const Navbar = () => {
                     <label>Password</label>
                     <input 
                       type="password" 
+                      placeholder='password'
                       required 
                       value={signupData.password}
                       onChange={(e) => setSignupData({...signupData, password: e.target.value})}
@@ -152,6 +155,7 @@ const Navbar = () => {
                     <label>Email</label>
                     <input 
                       type="email" 
+                      placeholder='email'
                       required 
                       value={loginData.email}
                       onChange={(e) => setLoginData({...loginData, email: e.target.value})}
@@ -161,6 +165,7 @@ const Navbar = () => {
                     <label>Password</label>
                     <input 
                       type="password" 
+                      placeholder='password'
                       required 
                       value={loginData.password}
                       onChange={(e) => setLoginData({...loginData, password: e.target.value})}
