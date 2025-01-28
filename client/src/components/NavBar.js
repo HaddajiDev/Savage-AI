@@ -11,6 +11,7 @@ const Navbar = () => {
   const [authMode, setAuthMode] = useState('login');
   const [isLoading, setIsLoading] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const token = localStorage.getItem("token");
   
   const [signupData, setSignupData] = useState({
     email: '',
@@ -62,10 +63,10 @@ const Navbar = () => {
         </div>
 
         <div className="navbar-right">
-          {!user ? (
+          {!token ? (
             <button 
-              className="navbar-signup-btn"
-              onClick={() => setShowAuthModal(true)}
+            className="navbar-signup-btn"
+            onClick={() => setShowAuthModal(true)}
             >
               Sign Up
             </button>
