@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { setToken } from '../redux/userSlice';
+import '../css/verify.css';
 
 function Verify() {
   const location = useLocation();
@@ -25,15 +26,19 @@ function Verify() {
       } else if (sent) {
         setMessage("Verification email sent");
       }
-    }, [location, navigate, dispatch]);
-  
+    }, [location, navigate, dispatch]); 
 
     return (
-      <div>
-        {message && <div style={{color: "white"}}>{message}</div>}
+      <div className="verify-container">
+          {message && <div className="verify-message">{message}</div>}
+          <button 
+              className="verify-button"
+              onClick={() => navigate('/', {replace: true})}
+          >
+              Go Back
+          </button>
       </div>
-    );
-  
+  ); 
 
 }
 
