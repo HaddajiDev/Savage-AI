@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
+import { encryptKryptos } from '../kryptos';
 
 const BASE_URL = process.env.REACT_APP_LINK;
 
@@ -41,11 +42,20 @@ export const currentUser = createAsyncThunk('user/current', async() => {
     }    
 });
 
+export const resendEmail = createAsyncThunk('email/send', async({email}) => {
+	try {
+		const result = await axios.post(`${BASE_URL}/user/api/resend`, {email});
+		return result.data;
+	} catch (error) {
+		console.log(error);
+	}
+})
+
 const initialState = {
     user: null,
     status: null,  
     error: null,  
-    token: null
+    token: null,	
 }
 
 export const userSlice = createSlice({
@@ -61,6 +71,7 @@ export const userSlice = createSlice({
 		setToken: (state, action) => {
             state.token = action.payload;
             localStorage.setItem("token", action.payload);
+			localStorage.removeItem("em");
 			window.location.reload();
         },
 		clearError(state) {
@@ -78,6 +89,7 @@ export const userSlice = createSlice({
 			state.status = "success";
 			state.user = action.payload?.user;
 			localStorage.setItem("token", action.payload.token);
+			localStorage.removeItem("em");
 			window.location.reload();
 		})
 		.addCase(userLogin.rejected, (state, action) => {
@@ -93,6 +105,8 @@ export const userSlice = createSlice({
 		.addCase(userRegister.fulfilled, (state, action) => {
 			state.status = "success";
 			window.location.href = action.payload.redirectUrl;
+			const email = encryptKryptos(action.payload.email, process.env.REACT_APP_KEY);
+			localStorage.setItem("em", email);
 		})
 		.addCase(userRegister.rejected, (state, action) => {
 			state.status = "failed";

@@ -1,5 +1,6 @@
 const express = require('express');
 const User = require('../models/user');
+const pendingUser = require('../models/pendingUser');
 
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -8,6 +9,7 @@ var jwt = require('jsonwebtoken');
 const {loginRules, registerRules, validation, UpdateRules} = require('../middleware/validator');
 const isAuth = require('../middleware/passport');
 const sendVerificationEmail = require('../utils/SendMail');
+
 
 
 router.post("/api/verify", registerRules(), validation, async(request, result) => {
@@ -35,10 +37,19 @@ router.post("/api/verify", registerRules(), validation, async(request, result) =
 			expiresIn: '7d'
 		});
 
-        sendVerificationEmail(request.body.email, token);
+        
+        const newPending = new pendingUser({
+            token: token,
+            email: request.body.email
+        })
 
+        await newPending.save();
+        
+        sendVerificationEmail(request.body.email, token);
+        
         result.status(200).send({            
-            redirectUrl: `${process.env.FRONT_URL}/verify?sent=true` 
+            redirectUrl: `${process.env.FRONT_URL}/verify?sent=true`,
+            email: request.body.email
         });
 
     } catch (error) {
@@ -53,8 +64,14 @@ router.get("/api/signup", async (request, result) => {
         if (!token) {
             return result.status(400).send({ error: 'Verification token is missing' });
         }
-
+        
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const Pending = await pendingUser.findOne({ email: decoded.email });
+        if (!Pending) {
+            return result.status(400).send({ error: 'Verification session expired' });
+        }
+
 
         const newUser = new User({
             username: decoded.username,
@@ -63,6 +80,8 @@ router.get("/api/signup", async (request, result) => {
         });
 
         const user = await newUser.save();
+
+        await pendingUser.deleteOne({ email: decoded.email });
 
         const payload = {
             _id : user._id
@@ -81,6 +100,16 @@ router.get("/api/signup", async (request, result) => {
         result.status(500).send({ error: 'Server error during verification' });
     }
 });
+
+router.post('/api/resend', async(req, res) => {
+    try {
+        const pending = await pendingUser.findOne({email: req.body.email});
+        sendVerificationEmail(req.body.email, pending.token);
+        res.send({status: "Mrigl"});
+    } catch (error) {
+        console.log(error);
+    }
+})
 
 
 
