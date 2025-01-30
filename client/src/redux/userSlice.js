@@ -51,6 +51,16 @@ export const resendEmail = createAsyncThunk('email/send', async({email}) => {
 	}
 })
 
+
+export const updatePassword = createAsyncThunk('user/reset', async({id, newPassword}) => {
+	try {
+		const result = await axios.put(`${BASE_URL}/user/reset`, {id, newPassword});
+		return result.data;
+	} catch (error) {
+		console.log(error);
+	}
+})
+
 const initialState = {
     user: null,
     status: null,  

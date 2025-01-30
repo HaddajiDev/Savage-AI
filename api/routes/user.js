@@ -101,6 +101,25 @@ router.get("/api/signup", async (request, result) => {
     }
 });
 
+router.put('/reset', async(req, res) => {
+    const { id, newPassword } = req.body;
+    try {      
+
+        const user = await User.findOne({_id: id});
+        const salt = 10;
+        const genSalt = await bcrypt.genSalt(salt);
+        const hashed_password = await bcrypt.hash(newPassword, genSalt);
+        
+        user.password = hashed_password;
+        user.save();
+
+        res.send({msg: "all good"});
+        
+    } catch (error) {
+        console.log(error);
+    }
+})
+
 router.post('/api/resend', async(req, res) => {
     try {
         const pending = await pendingUser.findOne({email: req.body.email});

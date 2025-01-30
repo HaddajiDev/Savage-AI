@@ -176,10 +176,10 @@ const Navbar = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Repeat Password</label>
+                    <label>Confirm Password</label>
                     <input 
                       type="password" 
-                      placeholder='Repeat password'
+                      placeholder='Confirm password'
                       required 
                       value={repeat_pass}
                       onChange={(e) => setRepeatPass(e.target.value)}

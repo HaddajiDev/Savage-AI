@@ -1,7 +1,46 @@
-import React from 'react';
-import '../css/profile.css'
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { updatePassword } from '../redux/userSlice';
+import '../css/profile.css';
 
-const ProfileModal = ({ user, onClose, onLogout, onResetPassword }) => {
+const ProfileModal = ({ user, onClose, onLogout }) => {
+  const dispatch = useDispatch();
+  const [showResetForm, setShowResetForm] = useState(false);
+  const [passwords, setPasswords] = useState({
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handlePasswordChange = (e) => {
+    setPasswords({
+      ...passwords,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await dispatch(updatePassword({ newPassword: passwords.newPassword, id: user?._id })).unwrap();
+      setShowResetForm(false);
+      setPasswords({ newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      setError(err.message || 'Password update failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="profile-modal-overlay" onClick={onClose}>
       <div className="profile-modal-content dark-theme" onClick={(e) => e.stopPropagation()}>
@@ -18,12 +57,58 @@ const ProfileModal = ({ user, onClose, onLogout, onResetPassword }) => {
         </div>
 
         <div className="profile-actions">
-          <button 
-            className="action-btn reset-password-btn"
-            onClick={onResetPassword}
-          >
-            Reset Password
-          </button>
+          {!showResetForm ? (
+            <button 
+              className="action-btn reset-password-btn"
+              onClick={() => setShowResetForm(true)}
+            >
+              Reset Password
+            </button>
+          ) : (
+            <form className="password-reset-form" onSubmit={handlePasswordSubmit}>
+              <input
+                type="password"
+                name="newPassword"
+                placeholder="New Password"
+                value={passwords.newPassword}
+                onChange={handlePasswordChange}
+                required
+              />
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                value={passwords.confirmPassword}
+                onChange={handlePasswordChange}
+                required
+              />
+              {error && <div className="error-message">{error}</div>}
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="action-btn cancel-btn"
+                  onClick={() => {
+                    setShowResetForm(false);
+                    setError('');
+                  }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="action-btn confirm-btn"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="loading-spinner" />
+                  ) : (
+                    'Update Password'
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+          
           <button 
             className="action-btn logout-btn"
             onClick={onLogout}
