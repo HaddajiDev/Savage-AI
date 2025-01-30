@@ -15,6 +15,9 @@ const Navbar = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const token = localStorage.getItem("token");
   const error = useSelector(state => state.user.error);
+  const [repeat_pass, setRepeatPass] = useState("");
+
+  const [error_pass, setErrorPass] = useState("");
 
   const [signupData, setSignupData] = useState({
     email: '',
@@ -43,8 +46,14 @@ const Navbar = () => {
         await dispatch(userLogin(loginData)).unwrap();
         
       } else {
-        dispatch(clearError());
-        await dispatch(userRegister(signupData)).unwrap();
+        if(signupData.password === repeat_pass){
+
+          dispatch(clearError());
+          await dispatch(userRegister(signupData)).unwrap();
+        }
+        else{
+          setErrorPass("Wrong password");
+        }
       }
     } catch (error) {
       console.error('Authentication error:', error);
@@ -56,7 +65,14 @@ const Navbar = () => {
   const closeAuthModal = () => {
     setShowAuthModal(false);
     dispatch(clearError());
-}
+    setErrorPass("");
+  }
+
+  const handleStateChange = (state) => {
+    setAuthMode(state);
+    dispatch(clearError());
+    setErrorPass("");
+  }
 
   return (
     <nav className="navbar">
@@ -114,13 +130,13 @@ const Navbar = () => {
             <div className="auth-modal-header">
               <button
                 className={`auth-tab ${authMode === 'login' ? 'active' : ''}`}
-                onClick={() => setAuthMode('login')}
+                onClick={() => handleStateChange('login')}
               >
                 Login
               </button>
               <button
                 className={`auth-tab ${authMode === 'signup' ? 'active' : ''}`}
-                onClick={() => setAuthMode('signup')}
+                onClick={() => handleStateChange('signup')}
               >
                 Sign Up
               </button>
@@ -159,6 +175,16 @@ const Navbar = () => {
                       onChange={(e) => setSignupData({...signupData, password: e.target.value})}
                     />
                   </div>
+                  <div className="form-group">
+                    <label>Repeat Password</label>
+                    <input 
+                      type="password" 
+                      placeholder='Repeat password'
+                      required 
+                      value={repeat_pass}
+                      onChange={(e) => setRepeatPass(e.target.value)}
+                    />
+                  </div>
                 </>
               ) : (
                 <>
@@ -184,7 +210,8 @@ const Navbar = () => {
                   </div>
                 </>
               )}
-
+              {error && <div className="auth-error-message">{error}</div>}
+              {error_pass && <div className="auth-error-message">{error_pass}</div>}
               <button 
                 className="auth-submit-btn" 
                 type="submit" 
@@ -195,7 +222,7 @@ const Navbar = () => {
                 ) : authMode === 'login' ? 'Login' : 'Create Account'}
               </button>
             </form>            
-            {error && <div className="auth-error-message">{error}</div>}
+            
           </div>
           
           
