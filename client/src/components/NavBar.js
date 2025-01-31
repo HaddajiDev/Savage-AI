@@ -32,10 +32,6 @@ const Navbar = () => {
     dispatch(logout());
   };
   
-  const handleResetPassword = () => {
-    console.log('password reset');
-  };
-
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -232,8 +228,7 @@ const Navbar = () => {
       <ProfileModal
         user={user}
         onClose={() => setShowProfileModal(false)}
-        onLogout={handleLogout}
-        onResetPassword={handleResetPassword}
+        onLogout={handleLogout}        
       />
     )}
     </nav>
