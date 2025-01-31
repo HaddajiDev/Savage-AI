@@ -9,6 +9,7 @@ var jwt = require('jsonwebtoken');
 const {loginRules, registerRules, validation, UpdateRules} = require('../middleware/validator');
 const isAuth = require('../middleware/passport');
 const sendVerificationEmail = require('../utils/SendMail');
+const sendForgotPassEmail = require('../utils/SendForgotPassMail');
 
 
 
@@ -128,9 +129,23 @@ router.post('/api/resend', async(req, res) => {
     } catch (error) {
         console.log(error);
     }
-})
+});
 
+router.post('/forgot', async(req, res) => {
+    try {
+        const user = await User.findOne({email: req.body.email});
+        if(!user){            
+            return res.status(400).send({error: "user not found"});
+        }
 
+        sendForgotPassEmail(req.body.email, user._id);
+        res.send({msg: "email sent"});
+
+    } catch (error) {
+        res.status(400).send({error: error});
+        console.log(error);
+    }
+});
 
 router.post('/login', loginRules(), validation, async (request, result) => {
     const { email, password } = request.body;

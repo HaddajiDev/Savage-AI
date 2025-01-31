@@ -4,6 +4,8 @@ import { logout, userLogin, userRegister } from '../redux/userSlice';
 import '../css/App.css';
 import ProfileModal from './ProfileModal';
 import { clearError } from '../redux/userSlice';
+import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 
 const Navbar = () => {
@@ -18,6 +20,7 @@ const Navbar = () => {
   const [repeat_pass, setRepeatPass] = useState("");
 
   const [error_pass, setErrorPass] = useState("");
+  const location = useLocation();
 
   const [signupData, setSignupData] = useState({
     email: '',
@@ -31,7 +34,7 @@ const Navbar = () => {
   const handleLogout = () => {
     dispatch(logout());
   };
-  
+
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -85,14 +88,14 @@ const Navbar = () => {
         </div>
 
         <div className="navbar-right">
-          {!token ? (
+          {!token && location.pathname === '/' ? (
             <button 
             className="navbar-signup-btn"
             onClick={() => setShowAuthModal(true)}
             >
               Sign Up
             </button>
-          ) : (
+          ) : ( token && (
             <div className="user-info" onClick={() => setShowProfileModal(true)}>
               <img 
                 className="user-avatar"
@@ -101,7 +104,7 @@ const Navbar = () => {
               />
               <span className="username">{user?.username}</span>
             </div>
-          )}
+          ))}
 
           <button className="navbar-icon-btn" aria-label="GitHub Repository">
             <a style={{all: 'unset'}} href='https://github.com/HaddajiDev/Savage-AI' target='_blank' rel="noreferrer">
@@ -203,7 +206,10 @@ const Navbar = () => {
                       value={loginData.password}
                       onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                     />
-                  </div>
+                  </div>  
+                  <Link className="forgot-password-link" to="/forgot" onClick={() => showAuthModal(false)}>
+                    Forgot password?
+                  </Link>
                 </>
               )}
               {error && <div className="auth-error-message">{error}</div>}
@@ -217,6 +223,7 @@ const Navbar = () => {
                   <div className="spinner" />
                 ) : authMode === 'login' ? 'Login' : 'Create Account'}
               </button>
+              
             </form>            
             
           </div>

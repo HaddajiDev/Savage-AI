@@ -284,3 +284,43 @@ body{
   border-radius: 4px;
   font-size: 14px;
 }
+
+
+.forgot-password-link {
+  color: #7289da; /* Discord-like blurple */
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin-left: auto; /* Pushes to right in flex container */
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.forgot-password-link:hover {
+  color: #5b6eae;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  background: rgba(114, 137, 218, 0.1);
+}
+
+.forgot-password-link:active {
+  transform: scale(0.98);
+}
+
+.forgot-password-link::before {
+  content: '🔒';
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .forgot-password-link {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+}

@@ -8,6 +8,8 @@ import { useDispatch } from 'react-redux';
 import { currentUser } from './redux/userSlice';
 import { useEffect } from 'react';
 import Verify from './components/Verify';
+import ForgotPass from './components/ForgotPass';
+import ChangePass from './components/ChangePass';
 
 function App() { 
   const auth = localStorage.getItem('token');
@@ -24,6 +26,8 @@ function App() {
       <Routes>
         <Route path='/' element={<Chat />}/>
         <Route path='/verify' element={<Verify />}/>
+        <Route path='/forgot' element={<ForgotPass />} />
+        <Route path='/password' element={<ChangePass />} />
       </Routes>
     </div>
   );
