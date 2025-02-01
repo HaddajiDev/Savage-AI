@@ -131,6 +131,7 @@ h2 {
   border: 1px solid var(--success);
   width: 100%;
   max-width: 360px;
+  margin-right: 35px;
 }
 
 .success-icon {
