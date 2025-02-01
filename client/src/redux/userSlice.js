@@ -144,6 +144,8 @@ export const userSlice = createSlice({
             state.error = action.payload?.error;
         })
 		.addCase(sendForgotMail.fulfilled, (state, action) => {
+			const email = encryptKryptos(action.payload.email, process.env.REACT_APP_KEY);
+			localStorage.setItem("em", email);
             state.error = action.payload?.error;
         })
 		.addCase(sendForgotMail.pending, (state, action) => {

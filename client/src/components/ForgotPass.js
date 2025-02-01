@@ -3,12 +3,15 @@ import '../css/forgot.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendForgotMail } from '../redux/userSlice';
+import { decryptKryptos } from '../kryptos';
 
 function ForgotPass() {
   const [email, setEmail] = useState('');
   const [isSent, setIsSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [cooldown, setCooldown] = useState(0); 
+  const [currentEmail, setUserEmail] = useState("");
   const api_error = useSelector(state => state.user.error);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -37,6 +40,28 @@ function ForgotPass() {
       setError('Failed. Please try again.');
     } finally {
       setIsLoading(false);
+      setCooldown(20);
+    }
+  };
+
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [cooldown]);
+
+  const handleResend = async () => {
+    try {
+      setCooldown(20);
+      setUserEmail(email);
+      if(localStorage.getItem("em")){
+        const em = localStorage.getItem("em");
+        setUserEmail(decryptKryptos(em ? em : "", process.env.REACT_APP_KEY));        
+      }
+      await dispatch(sendForgotMail({email: currentEmail})).unwrap();
+    } catch (error) {
+      setError('Failed. Please try again.');
     }
   };
 
@@ -82,16 +107,26 @@ function ForgotPass() {
             </button>
           </form>
         ) : (
-          <div className="success-message">
-            <div className="success-icon">✓</div>
-            <h3 style={{color: 'white'}}>Email Sent!</h3>
-            <p style={{color: 'white'}}>
-              We've sent instructions to {email}.<br />
-              Check your spam folder if you don't see it.
-            </p>
-          </div>
+          <>
+            <div className="success-message">
+              <div className="success-icon">✓</div>
+              <h3 style={{color: 'white'}}>Email Sent!</h3>
+              <p style={{color: 'white'}}>
+                We've sent instructions to {email}.<br />
+                Check your spam folder if you don't see it.
+              </p>
+            </div>
+            <div className='resend-button-forgot'>
+            <button
+              className={`resend-button ${cooldown > 0 ? 'disabled' : ''}`}
+              onClick={handleResend}
+              disabled={cooldown > 0}
+            >
+            {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Email"}
+            </button></div>
+          </>
         )}
-
+        
         <div className="back-to-login">
           Remember your password? <Link to="/">Login here</Link>
         </div>

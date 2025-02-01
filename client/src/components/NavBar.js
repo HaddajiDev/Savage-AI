@@ -207,7 +207,7 @@ const Navbar = () => {
                       onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                     />
                   </div>  
-                  <Link className="forgot-password-link" to="/forgot" onClick={() => showAuthModal(false)}>
+                  <Link className="forgot-password-link" to="/forgot?sent=false" onClick={() => showAuthModal(false)}>
                     Forgot password?
                   </Link>
                 </>

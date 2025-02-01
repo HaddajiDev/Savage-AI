@@ -29,7 +29,7 @@ const sendForgotPassEmail = async (email, id) => {
                 </a>
               </p>
               <p style="font-size: 14px; color: #666; margin: 30px 0 0; text-align: center;">
-                If you didn’t create an account, you can safely ignore this email.
+                don't share this link with anyone.
               </p>
             </main>
             <footer style="background-color: #f8f8f8; text-align: center; padding: 10px 20px; font-size: 12px; color: #777;">
