@@ -139,7 +139,7 @@ router.post('/forgot', async(req, res) => {
         }
 
         sendForgotPassEmail(req.body.email, user._id);
-        res.send({msg: "email sent"});
+        res.status(200).send({msg: "email sent", email: req.body.email});
 
     } catch (error) {
         res.status(400).send({error: error});

@@ -1,41 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import '../css/forgot.css';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendForgotMail } from '../redux/userSlice';
 import { decryptKryptos } from '../kryptos';
 
 function ForgotPass() {
   const [email, setEmail] = useState('');
-  const [isSent, setIsSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [cooldown, setCooldown] = useState(0); 
-  const [currentEmail, setUserEmail] = useState("");
-  const api_error = useSelector(state => state.user.error);
+  const [cooldown, setCooldown] = useState(0);
+  const api_error = useSelector((state) => state.user.error);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isSent = searchParams.get('sent') === 'true';
 
-    useEffect(() => {
-        if(localStorage.getItem("token")){
-            navigate("/", { replace: true });
-        }
-    }, [navigate]);
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     if (!validateEmail(email)) {
       setError('Please enter a valid email address');
       return;
     }
 
     try {
-      setIsLoading(true);      
-      await dispatch(sendForgotMail({email: email})).unwrap();
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setIsSent(true);
+      setIsLoading(true);
+      await dispatch(sendForgotMail({ email })).unwrap();
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setSearchParams({ sent: 'true' });
     } catch (err) {
       setError('Failed. Please try again.');
     } finally {
@@ -54,13 +55,13 @@ function ForgotPass() {
   const handleResend = async () => {
     try {
       setCooldown(20);
-      setUserEmail(email);
-      if(localStorage.getItem("em")){
+      let currentEmail = email;
+      if (localStorage.getItem("em")) {
         const em = localStorage.getItem("em");
-        setUserEmail(decryptKryptos(em ? em : "", process.env.REACT_APP_KEY));        
+        currentEmail = decryptKryptos(em, process.env.REACT_APP_KEY);
       }
-      await dispatch(sendForgotMail({email: currentEmail})).unwrap();
-    } catch (error) {
+      await dispatch(sendForgotMail({ email: currentEmail })).unwrap();
+    } catch (err) {
       setError('Failed. Please try again.');
     }
   };
@@ -110,23 +111,24 @@ function ForgotPass() {
           <>
             <div className="success-message">
               <div className="success-icon">✓</div>
-              <h3 style={{color: 'white'}}>Email Sent!</h3>
-              <p style={{color: 'white'}}>
-                We've sent instructions to {email}.<br />
+              <h3 style={{ color: 'white' }}>Email Sent!</h3>
+              <p style={{ color: 'white' }}>
+                We've sent instructions to {localStorage.getItem("em") || email}.<br />
                 Check your spam folder if you don't see it.
               </p>
             </div>
             <div className='resend-button-forgot'>
-            <button
-              className={`resend-button ${cooldown > 0 ? 'disabled' : ''}`}
-              onClick={handleResend}
-              disabled={cooldown > 0}
-            >
-            {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Email"}
-            </button></div>
+              <button
+                className={`resend-button ${cooldown > 0 ? 'disabled' : ''}`}
+                onClick={handleResend}
+                disabled={cooldown > 0}
+              >
+                {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Email"}
+              </button>
+            </div>
           </>
         )}
-        
+
         <div className="back-to-login">
           Remember your password? <Link to="/">Login here</Link>
         </div>
