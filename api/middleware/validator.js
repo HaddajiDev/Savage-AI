@@ -25,6 +25,9 @@ exports.loginRules = () =>
         }),
 ];
 
+exports.UpdateRules = () => [    
+    check('newPassword', 'New password must be at least 6 characters').isLength({ min: 6 }),
+]
 
 
 exports.validation = (req, res, next) => {

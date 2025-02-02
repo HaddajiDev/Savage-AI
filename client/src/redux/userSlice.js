@@ -52,12 +52,15 @@ export const resendEmail = createAsyncThunk('email/send', async({email}) => {
 })
 
 
-export const updatePassword = createAsyncThunk('user/reset', async({id, newPassword}) => {
-	try {
+export const updatePassword = createAsyncThunk('user/reset', async({id, newPassword},  {rejectWithValue}) => {
+	try {		
 		const result = await axios.put(`${BASE_URL}/user/reset`, {id, newPassword});
 		return result.data;
-	} catch (error) {
-		console.log(error);
+	} catch (error) {		
+		const errorData = error.response?.data;
+        return rejectWithValue({
+            error: errorData?.error || 'Failed. Please try again.'
+        });
 	}
 });
 
@@ -149,6 +152,18 @@ export const userSlice = createSlice({
             state.error = action.payload?.error;
         })
 		.addCase(sendForgotMail.pending, (state, action) => {
+            state.error = action.payload?.error;
+        })
+
+
+
+		.addCase(updatePassword.rejected, (state, action) => {
+            state.error = action.payload?.error;
+        })
+		.addCase(updatePassword.fulfilled, (state, action) => {
+            state.error = action.payload?.error;
+        })
+		.addCase(updatePassword.pending, (state, action) => {
             state.error = action.payload?.error;
         })
     }

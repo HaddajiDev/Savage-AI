@@ -19,12 +19,8 @@ app.use(express.json());
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }
+  saveUninitialized: true
 }));
-
-
-
 
 app.use('/api', require('./routes/chat'));
 app.use('/user', require('./routes/user'));

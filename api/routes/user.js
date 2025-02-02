@@ -102,24 +102,36 @@ router.get("/api/signup", async (request, result) => {
     }
 });
 
-router.put('/reset', async(req, res) => {
+router.put('/reset', async (req, res) => {   
+    console.log(req.body);
     const { id, newPassword } = req.body;
-    try {      
 
-        const user = await User.findOne({_id: id});
-        const salt = 10;
-        const genSalt = await bcrypt.genSalt(salt);
+    try {
+        if (!id || !newPassword) {
+            return res.status(400).send({ error: "new Password are required" });
+        }
+
+        const saltRounds = 10;
+        const genSalt = await bcrypt.genSalt(saltRounds);
         const hashed_password = await bcrypt.hash(newPassword, genSalt);
-        
-        user.password = hashed_password;
-        user.save();
 
-        res.send({msg: "all good"});
-        
+        const updatedUser = await User.findByIdAndUpdate(
+            id, 
+            { $set: { password: hashed_password } }, 
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).send({ error: 'User not found' });
+        }
+
+        res.send({ msg: "Password reset successful" });
     } catch (error) {
-        console.log(error);
+        console.error("Error:", error);
+        res.status(500).send({ error: 'Internal Server Error' });
     }
-})
+});
+
 
 router.post('/api/resend', async(req, res) => {
     try {

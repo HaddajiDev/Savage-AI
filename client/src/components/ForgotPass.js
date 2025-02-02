@@ -113,7 +113,7 @@ function ForgotPass() {
               <div className="success-icon">✓</div>
               <h3 style={{ color: 'white' }}>Email Sent!</h3>
               <p style={{ color: 'white' }}>
-                We've sent instructions to {localStorage.getItem("em") || email}.<br />
+                We've sent instructions to {email}.<br />
                 Check your spam folder if you don't see it.
               </p>
             </div>

@@ -3,8 +3,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import '../css/Chat.css';
 import { useSelector } from 'react-redux';
+import '../css/Chat.css';
 
 marked.setOptions({
   breaks: true,
@@ -12,16 +12,35 @@ marked.setOptions({
   highlight: (code, lang) => code
 });
 
+const Loader = () => (
+  <div className="loader">
+    <div className="loader-dot"></div>
+    <div className="loader-dot"></div>
+    <div className="loader-dot"></div>
+  </div>
+);
+
 const Chat = () => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState(null);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [chats, setChats] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [visible, setVisiblily] = useState(false);
   const messagesEndRef = useRef(null);
   const user = useSelector(state => state.user.user);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (!selectedChat) {
+      handleNewChat();
+    }
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -87,7 +106,6 @@ const Chat = () => {
 
     if (userMessage) {
       setIsLoading(true);
-      
       setMessages(prev => prev.filter(msg => msg.id !== messageId));
 
       try {
@@ -178,93 +196,143 @@ const Chat = () => {
     }
   };
 
+  const handleNewChat = () => {
+    const newChat = {
+      id: Date.now(),
+      title: `Chat ${chats.length + 1}`,
+      lastMessage: '',
+      timestamp: new Date().toLocaleTimeString()
+    };
+    setChats([newChat, ...chats]);
+    setSelectedChat(newChat.id);
+    setMessages([]);
+  };
+
+  const filteredChats = chats.filter(chat =>
+    chat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div style={{backgroundcolor: '#1a1a1a'}}>        
-        <div className="chat-container">
-        <div className="chat-messages">
-            {messages.map((msg) => (
-            <div key={msg.id} className={`message ${msg.isUser ? 'user' : 'ai'}`}>
-                {msg.isThinking ? (
-                <div className="thinking-indicator">
-                    <div className="dot-flashing"></div>
-                </div>
-                ) : (
-                <div className="message-content">
-                    {msg.parts?.map((part, partIndex) => (
-                    part.type === 'code' ? (
-                        <div key={partIndex} className="code-block-container">
-                        <div className="code-header">
-                            <span className="language-tag">
-                            {part.language}
-                            </span>
-                            <button
-                            className="copy-button"
-                            onClick={() => handleCopy(part.content, msg.id)}
-                            >
-                            {copiedMessageId === msg.id ? '✅' : '📋'}
-                            </button>
-                        </div>
-                        <SyntaxHighlighter
-                            language={part.language}
-                            style={vscDarkPlus}
-                            className="code-block"
-                            wrapLongLines
-                        >
-                            {part.content}
-                        </SyntaxHighlighter>
-                        </div>
-                    ) : (
-                        <div
-                        key={partIndex}
-                        className="markdown-content"
-                        dangerouslySetInnerHTML={renderMarkdown(part.content)}
-                        />
-                    )
-                    ))}
-
-                    {!msg.isUser && (
-                    <div className="message-actions">
-                        <button
-                        className="action-btn copy-btn"
-                        onClick={() => handleCopy(msg.content, msg.id)}
-                        title="Copy entire response"
-                        >
-                        {copiedMessageId === msg.id ? '✅ Copied' : '📋 Copy'}
-                        </button>
-                        <button
-                        className="action-btn regenerate-btn"
-                        onClick={() => handleRegenerate(msg.id)}
-                        disabled={isLoading}
-                        title="Regenerate response"
-                        >
-                        ⟳ Regenerate
-                        </button>
-                    </div>
-                    )}
-                </div>
-                )}
-            </div>
-            ))}
-            <div ref={messagesEndRef} />
+    <div className="chat-app">      
+      {visible && (
+      <div className="chat-sidebar">
+        <div className="sidebar-header">
+          <h2>Chat History</h2>
+          <button onClick={handleNewChat} className="new-chat-btn">
+            + New Chat
+          </button>
         </div>
-
-        <form onSubmit={handleSubmit} className="chat-input">
-            <input
+        <p className='disclaimer'>chat history do not work yet</p>
+        <div className="search-bar">
+          <input
             type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
-            disabled={isLoading}
-            />
-            <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Sending...' : 'Send'}
-            </button>
-        </form>        
+            placeholder="Search chats..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-        <p className='disclaimer'>AI do not save chats yet but it remember last time you chat with it.. i think.. idk</p>
-        <p className='disclaimer'>Made By Ahmed Haddaji</p>
-    </div>
 
+        <div className="chat-list">
+          {filteredChats.map(chat => (
+            <div
+              key={chat.id}
+              className={`chat-item ${selectedChat === chat.id ? 'selected' : ''}`}
+              onClick={() => setSelectedChat(chat.id)}
+            >
+              <div className="chat-item-header">
+                <h3>{chat.title}</h3>
+                <span className="timestamp">{chat.timestamp}</span>
+              </div>
+              <p className="last-message">
+                {chat.lastMessage || 'New chat...'}
+              </p>
+            </div>
+            
+          ))}
+        </div>
+      </div>)}
+
+      <div className="main-chat-area">
+      <button className='toggle-sidebar-btn' onClick={() => setVisiblily(!visible)}>{visible ? "<" : ">"}</button>
+        {selectedChat ? (
+          <>
+            <div className="chat-messages">
+              {messages.map((msg) => (
+                <div key={msg.id} className={`message ${msg.isUser ? 'user' : 'ai'}`}>
+                  {msg.isThinking ? (
+                    <div className="thinking-indicator">
+                      <Loader />
+                    </div>
+                  ) : (
+                    <div className="message-content">
+                      {msg.parts?.map((part, partIndex) => (
+                        part.type === 'code' ? (
+                          <div key={partIndex} className="code-block">
+                            <div className="code-header">
+                              <span className="code-lang">{part.language}</span>
+                              <button
+                                className="copy-btn"
+                                onClick={() => handleCopy(part.content, msg.id)}
+                              >
+                                {copiedMessageId === msg.id ? 'Copied!' : 'Copy'}
+                              </button>
+                            </div>
+                            <SyntaxHighlighter
+                              language={part.language}
+                              style={vscDarkPlus}
+                              className="syntax-highlighter"
+                            >
+                              {part.content}
+                            </SyntaxHighlighter>
+                          </div>
+                        ) : (
+                          <div
+                            key={partIndex}
+                            className="markdown-content"
+                            dangerouslySetInnerHTML={renderMarkdown(part.content)}
+                          />
+                        )
+                      ))}
+
+                      {!msg.isUser && (
+                        <div className="message-actions">
+                          <button
+                            className="action-btn regenerate-btn"
+                            onClick={() => handleRegenerate(msg.id)}
+                            disabled={isLoading}
+                          >
+                            ⟳ Regenerate
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+
+            <form className="chat-input" onSubmit={handleSubmit}>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type your message..."
+                disabled={isLoading}
+              />
+              <button type="submit" disabled={isLoading}>
+                {isLoading ? <Loader /> : 'Send'}
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="empty-state">
+            <h3>Select a chat or start a new conversation</h3>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

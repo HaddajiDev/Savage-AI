@@ -29,6 +29,11 @@ const ProfileModal = ({ user, onClose, onLogout }) => {
       return;
     }
 
+    if(passwords.newPassword.length < 6){
+      setError("New password must be at least 6 characters");
+      return;
+  }
+
     setIsLoading(true);
     try {
       await dispatch(updatePassword({ newPassword: passwords.newPassword, id: user?._id })).unwrap();

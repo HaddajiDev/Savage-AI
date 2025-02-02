@@ -31,6 +31,11 @@ function ChangePass() {
             return;
         }
 
+        if(newPassword.length < 6){
+            setError("New password must be at least 6 characters");
+            return;
+        }
+
         try {
             setIsLoading(true);
             dispatch(updatePassword({id: id, newPassword: newPassword}))
