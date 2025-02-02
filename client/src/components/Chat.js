@@ -214,7 +214,7 @@ const Chat = () => {
   );
 
   return (
-    <div className="chat-app">      
+    <div className="chat-app">
       {visible && (
       <div className="chat-sidebar">
         <div className="sidebar-header">
@@ -252,9 +252,8 @@ const Chat = () => {
           ))}
         </div>
       </div>)}
-
       <div className="main-chat-area">
-      <button className='toggle-sidebar-btn' onClick={() => setVisiblily(!visible)}>{visible ? "<" : ">"}</button>
+      <button className='toggle-sidebar-btn' onClick={() => setVisiblily(!visible)}>{visible ? "<" : ">"}</button>      
         {selectedChat ? (
           <>
             <div className="chat-messages">
@@ -322,8 +321,8 @@ const Chat = () => {
                 disabled={isLoading}
               />
               <button type="submit" disabled={isLoading}>
-                {isLoading ? <Loader /> : 'Send'}
-              </button>
+                {isLoading ? <Loader /> : <img style={{width: '25px'}} src='https://cdn4.iconfinder.com/data/icons/multimedia-75/512/multimedia-42-256.png'/>}
+              </button>              
             </form>
           </>
         ) : (
