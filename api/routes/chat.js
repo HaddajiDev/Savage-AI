@@ -9,44 +9,42 @@ const openai = new OpenAI({
 });
 
 router.post('/chat', async (req, res) => {
-  let chatHistory;
   try {
     const sessionId = req.sessionID;
-
-    chatHistory = await ChatHistory.findOne({ sessionId });
-    
-    if (!chatHistory) {
-      chatHistory = new ChatHistory({
-        sessionId,
-        messages: [{ role: "system", content: process.env.PORMPT }]
-      });
-      await chatHistory.save();
-    }
+    const { PROMPT } = req.body;
 
     const userMessage = req.body.message;
-    chatHistory.messages.push({ role: "user", content: userMessage });
-    await chatHistory.save();
 
+    
+    let chatHistory = await ChatHistory.findOne({ sessionId }) || 
+      new ChatHistory({ sessionId, messages: [] });
+
+    const messages = [
+      { role: "system", content: PROMPT },
+      ...chatHistory.messages,
+      { role: "user", content: userMessage }
+    ];
+
+    // Get AI response
     const completion = await openai.chat.completions.create({
       model: process.env.MODEL,
-      messages: chatHistory.messages
+      messages: messages
     });
 
     const aiResponse = completion.choices[0].message.content;
-    chatHistory.messages.push({ role: "assistant", content: aiResponse });
+    
+    // Update chat history (without saving the system prompt)
+    chatHistory.messages.push(
+      { role: "user", content: userMessage },
+      { role: "assistant", content: aiResponse }
+    );
+    
     await chatHistory.save();
-
+    
     res.json({ response: aiResponse });
   } catch (error) {
     console.error(error);
-    const aiResponse = "sorry.. ai failed to generate response";
-    
-    if (chatHistory) {
-      chatHistory.messages.push({ role: "assistant", content: aiResponse });
-      await chatHistory.save().catch(e => console.error("Failed to save error:", e));
-    }
-    
-    res.json({ response: aiResponse });
+    res.json({ response: "Sorry, AI failed to generate response" });
   }
 });
 

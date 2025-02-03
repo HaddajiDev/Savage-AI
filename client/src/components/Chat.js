@@ -30,8 +30,9 @@ const Chat = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [visible, setVisiblily] = useState(false);
   const messagesEndRef = useRef(null);
-  const [isSkullActive, setIsSkullActive] = useState(false);
+  const [SavageMode, setSavageMode] = useState(false);
 
+  
   const user = useSelector(state => state.user.user);
 
   useEffect(() => {
@@ -122,7 +123,8 @@ const Chat = () => {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userMessage.content + ` username : ${user?.username}` })
+          body: JSON.stringify({ message: userMessage.content + ` username : ${user?.username}`,
+          PROMPT: SavageMode ? process.env.REACT_APP_SAVAGE_PORMPT : process.env.REACT_APP_GOOD_PORMPT })
         });
 
         const data = await response.json();
@@ -172,7 +174,8 @@ const Chat = () => {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input + ` username : ${user?.username}`  })
+        body: JSON.stringify({ message: input + ` username : ${user?.username}`,
+        PROMPT: SavageMode ? process.env.REACT_APP_SAVAGE_PORMPT : process.env.REACT_APP_GOOD_PORMPT})
       });
 
       const data = await response.json();
@@ -313,8 +316,9 @@ const Chat = () => {
               ))}
               <div ref={messagesEndRef} />
             </div>
-
+              
             <form className="chat-input" onSubmit={handleSubmit}>
+              <div style={{width: '100%', display: 'flex'}}>
                 <input
                   type="text"
                   value={input}
@@ -322,20 +326,25 @@ const Chat = () => {
                   placeholder="Type your message..."
                   disabled={isLoading}
                 />
-                <button type="submit" disabled={isLoading}>
+                <button type="submit" disabled={isLoading} style={{marginLeft: '20px'}}>
                   {isLoading ? <Loader /> : <img style={{width: '25px'}} src='https://cdn4.iconfinder.com/data/icons/multimedia-75/512/multimedia-42-256.png'/>}
-                </button>       
+                </button>
+                </div>   
+                <div>
+                    <div className="skull-button-container">
+                    <button 
+                      type="button" 
+                      className={`skull-button ${SavageMode ? 'active' : ''}`}
+                      onClick={() => setSavageMode(!SavageMode)}
+                    >
+                    Savage Mode 💀
+                  </button>
+                 </div>
+                </div> 
             </form>
             
-            {/* <div className="skull-button-container">
-              <button 
-                type="button" 
-                className={`skull-button ${isSkullActive ? 'active' : ''}`}
-                onClick={() => setIsSkullActive(!isSkullActive)}
-              >
-                Dangerous Zone 💀
-              </button>
-            </div> */}
+            
+            
           </>
         ) : (
           <div className="empty-state">

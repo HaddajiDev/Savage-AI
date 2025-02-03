@@ -117,7 +117,8 @@
 
 .chat-input {
   display: flex;  
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: space-around;
   gap: 1rem;
   padding: 1.5rem 2rem;
   background: var(--secondary-bg);
@@ -148,7 +149,7 @@
   color: var(--primary-bg);
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s;  
 }
 
 .chat-input button:hover {
@@ -426,7 +427,7 @@
 .skull-button-container {
   margin-top: 1rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .skull-button {
@@ -434,23 +435,23 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: var(--secondary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  background: var(--secondary-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 20px !important;
+  color: #666 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
 }
 
 .skull-button.active {
-  color: var(--accent-color);
-  border-color:  var(--accent-color);
+  color: var(--accent-color) !important;
+  border-color:  var(--accent-color) !important;
 }
 
 .skull-button.active::after {  
-  filter: hue-rotate(120deg) saturate(200%);
+  filter: hue-rotate(120deg) saturate(200%) !important;
 }
 
 .skull-button:hover {
-  background: var(--hover-bg);
+  background: var(--hover-bg) !important;
 }
