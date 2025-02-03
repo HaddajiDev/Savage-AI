@@ -32,7 +32,7 @@ const Chat = () => {
   const messagesEndRef = useRef(null);
   const [SavageMode, setSavageMode] = useState(false);
 
-  
+
   const user = useSelector(state => state.user.user);
 
   useEffect(() => {
@@ -174,8 +174,9 @@ const Chat = () => {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input + ` username : ${user?.username}`,
-        PROMPT: SavageMode ? process.env.REACT_APP_SAVAGE_PORMPT : process.env.REACT_APP_GOOD_PORMPT})
+        body: JSON.stringify({ message: input,
+        username: user?.username,
+        mode: SavageMode ? 1 : 0})
       });
 
       const data = await response.json();

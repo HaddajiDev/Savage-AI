@@ -10,41 +10,61 @@ const openai = new OpenAI({
 
 router.post('/chat', async (req, res) => {
   try {
+    const { message, mode, username } = req.body;
     const sessionId = req.sessionID;
-    const { PROMPT } = req.body;
 
-    const userMessage = req.body.message;
+    if (!message?.trim()) {
+      return res.status(400).json({ error: "Message is required" });
+    }
 
     
+    const SYSTEM_PROMPT = 
+      mode === 1 ? process.env.SAVAGE_PROMPT : process.env.GOOD_PROMPT;
+
     let chatHistory = await ChatHistory.findOne({ sessionId }) || 
       new ChatHistory({ sessionId, messages: [] });
 
+    const userMessage = username 
+      ? `${message} (username: ${username})`
+      : message;
+
     const messages = [
-      { role: "system", content: PROMPT },
+      { role: "system", content: SYSTEM_PROMPT },
       ...chatHistory.messages,
       { role: "user", content: userMessage }
     ];
 
-    // Get AI response
+    if (messages.length > 20) {
+      messages.splice(1, messages.length - 20);
+    }
+
     const completion = await openai.chat.completions.create({
       model: process.env.MODEL,
-      messages: messages
+      messages
     });
 
     const aiResponse = completion.choices[0].message.content;
-    
-    // Update chat history (without saving the system prompt)
-    chatHistory.messages.push(
-      { role: "user", content: userMessage },
-      { role: "assistant", content: aiResponse }
+
+    await ChatHistory.findOneAndUpdate(
+      { sessionId },
+      { 
+        $push: { 
+          messages: { 
+            $each: [
+              { role: "user", content: userMessage },
+              { role: "assistant", content: aiResponse }
+            ],
+            $slice: -20
+          } 
+        } 
+      },
+      { upsert: true }
     );
-    
-    await chatHistory.save();
-    
+
     res.json({ response: aiResponse });
   } catch (error) {
-    console.error(error);
-    res.json({ response: "Sorry, AI failed to generate response" });
+    console.error("Chat Error:", error);
+    res.status(500).json({ response: "AI service unavailable" });
   }
 });
 
