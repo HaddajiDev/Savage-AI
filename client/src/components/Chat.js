@@ -30,6 +30,8 @@ const Chat = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [visible, setVisiblily] = useState(false);
   const messagesEndRef = useRef(null);
+  const [isSkullActive, setIsSkullActive] = useState(false);
+
   const user = useSelector(state => state.user.user);
 
   useEffect(() => {
@@ -313,17 +315,27 @@ const Chat = () => {
             </div>
 
             <form className="chat-input" onSubmit={handleSubmit}>
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your message..."
-                disabled={isLoading}
-              />
-              <button type="submit" disabled={isLoading}>
-                {isLoading ? <Loader /> : <img style={{width: '25px'}} src='https://cdn4.iconfinder.com/data/icons/multimedia-75/512/multimedia-42-256.png'/>}
-              </button>              
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Type your message..."
+                  disabled={isLoading}
+                />
+                <button type="submit" disabled={isLoading}>
+                  {isLoading ? <Loader /> : <img style={{width: '25px'}} src='https://cdn4.iconfinder.com/data/icons/multimedia-75/512/multimedia-42-256.png'/>}
+                </button>       
             </form>
+            
+            {/* <div className="skull-button-container">
+              <button 
+                type="button" 
+                className={`skull-button ${isSkullActive ? 'active' : ''}`}
+                onClick={() => setIsSkullActive(!isSkullActive)}
+              >
+                Dangerous Zone 💀
+              </button>
+            </div> */}
           </>
         ) : (
           <div className="empty-state">

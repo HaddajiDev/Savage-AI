@@ -10,7 +10,7 @@ const SettingsModal = ({ show, onClose }) => {
         <h3 className="settings-modal-title">Settings</h3>
         
         <div className="settings-option">
-          <span className="option-label">Savage Mode</span>
+          <span className="option-label">Save Chat</span>
           <label className="theme-switch">
             <input type="checkbox" checked/>
             <span className="switch-slider"></span>
