@@ -329,7 +329,7 @@ const Chat = () => {
                   disabled={isLoading}
                 />
                 <button type="submit" disabled={isLoading} style={{marginLeft: '20px'}}>
-                  {isLoading ? <Loader /> : <img style={{width: '25px'}} src='https://cdn4.iconfinder.com/data/icons/multimedia-75/512/multimedia-42-256.png'/>}
+                  {isLoading ? "..." : <img style={{width: '25px'}} src='https://cdn4.iconfinder.com/data/icons/multimedia-75/512/multimedia-42-256.png'/>}
                 </button>
                 </div>   
                 <div>
