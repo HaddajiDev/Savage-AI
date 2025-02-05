@@ -3,9 +3,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import '../css/Chat.css';
-import { getChats } from '../redux/chatSlice';
 
 marked.setOptions({
   breaks: true,
@@ -35,15 +34,6 @@ const Chat = () => {
 
 
   const user = useSelector(state => state.user.user);
-  const userChats = useSelector(state => state.chat.chats);
-  const dispatch = useDispatch();
-
-
-  useEffect(() => {
-    if (user && user?._id) {
-      dispatch(getChats({ id: user._id }));
-    }
-  })
 
   useEffect(() => {
     scrollToBottom();
@@ -227,6 +217,10 @@ const Chat = () => {
     setMessages([]);
   };
 
+  const filteredChats = chats.filter(chat =>
+    chat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="chat-app">
@@ -239,16 +233,24 @@ const Chat = () => {
           </button>
         </div>
         <p className='disclaimer'>chat history do not work yet</p>
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Search chats..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
         <div className="chat-list">
-          {userChats.map(chat => (
+          {filteredChats.map(chat => (
             <div
               key={chat.id}
               className={`chat-item ${selectedChat === chat.id ? 'selected' : ''}`}
               onClick={() => setSelectedChat(chat.id)}
             >
               <div className="chat-item-header">
-                <h3>{chat.sessionId}</h3>
+                <h3>{chat.title}</h3>
                 <span className="timestamp">{chat.timestamp}</span>
               </div>
               <p className="last-message">
@@ -260,7 +262,7 @@ const Chat = () => {
         </div>
       </div>)}
       <div className="main-chat-area">
-      {user && (<button className='toggle-sidebar-btn' onClick={() => setVisiblily(!visible)}>{visible ? "<" : ">"}</button>)}
+      <button className='toggle-sidebar-btn' onClick={() => setVisiblily(!visible)}>{visible ? "<" : ">"}</button>      
         {selectedChat ? (
           <>
             <div className="chat-messages">
