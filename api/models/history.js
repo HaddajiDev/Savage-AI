@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const chatHistorySchema = new mongoose.Schema({
+  userId: {
+    type: String,
+    required: false,    
+  },
   sessionId: {
     type: String,
     required: true,

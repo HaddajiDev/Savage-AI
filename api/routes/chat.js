@@ -39,7 +39,7 @@ function getModeContext(history, currentMode) {
 
 router.post('/chat', async (req, res) => {
   try {
-    const { message, mode, username } = req.body;
+    const { message, mode, username, id } = req.body;
     const sessionId = req.sessionID;
 
     if (!message?.trim()) {
@@ -47,7 +47,7 @@ router.post('/chat', async (req, res) => {
     }
 
     let chatHistory = await ChatHistory.findOne({ sessionId }) || 
-      new ChatHistory({ sessionId, messages: [] });
+      new ChatHistory({ sessionId, messages: [], userId: id === 'undefined' ? "" : id });
 
     const SYSTEM_PROMPT = mode === 1 
       ? process.env.SAVAGE_PROMPT 
@@ -89,6 +89,32 @@ router.post('/chat', async (req, res) => {
   } catch (error) {
     console.error("Chat Error:", error);
     res.status(500).json({ response: "AI service unavailable" });
+  }
+});
+
+router.get('/chat', async(req, res) => {
+  const { id } = req.body;
+
+  try {
+    if (!id) return res.status(404).send({ error: 'user not found' });
+    const chats = await ChatHistory.find({userId: id});
+    res.status(200).send({chats: chats});
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({error: error});
+  }
+});
+
+
+router.get('/chat/:sessionId', async (req, res) => {
+  const { sessionId } = req.params;
+  try {
+    const chat = await ChatHistory.findOne({ sessionId });
+    if (!chat) return res.status(404).send({ error: 'Chat not found' });
+    res.status(200).send({ messages: chat.messages });
+  } catch (error) {
+    console.error(error);
+    res.status(400).send({ error: error.message });
   }
 });
 
