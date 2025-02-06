@@ -3,7 +3,9 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { getChats, getChatMessages } from '../redux/chatSlice';
+
 import '../css/Chat.css';
 
 marked.setOptions({
@@ -26,7 +28,7 @@ const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState(null);
   const [selectedChat, setSelectedChat] = useState(null);
-  const [chats, setChats] = useState([]);
+  const [_chats, setChats] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [visible, setVisiblily] = useState(false);
   const messagesEndRef = useRef(null);
@@ -34,6 +36,26 @@ const Chat = () => {
 
 
   const user = useSelector(state => state.user.user);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(getChats({ id: user.id }));
+    }
+  }, [user, dispatch]);
+
+  const handleChatSelect = (sessionId) => {
+    dispatch(getChatMessages({ sessionId }));
+  };
+
+  const {
+    chats,
+    activeChatMessages, 
+    activeChatSessionId,
+    chatsStatus 
+  } = useSelector(state => state.chat);
+
 
   useEffect(() => {
     scrollToBottom();
@@ -208,16 +230,16 @@ const Chat = () => {
   const handleNewChat = () => {
     const newChat = {
       id: Date.now(),
-      title: `Chat ${chats.length + 1}`,
+      title: `Chat ${_chats.length + 1}`,
       lastMessage: '',
       timestamp: new Date().toLocaleTimeString()
     };
-    setChats([newChat, ...chats]);
+    setChats([newChat, ..._chats]);
     setSelectedChat(newChat.id);
     setMessages([]);
   };
 
-  const filteredChats = chats.filter(chat =>
+  const filteredChats = _chats.filter(chat =>
     chat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -245,9 +267,9 @@ const Chat = () => {
         <div className="chat-list">
           {filteredChats.map(chat => (
             <div
-              key={chat.id}
+              key={chat.sessionId}
               className={`chat-item ${selectedChat === chat.id ? 'selected' : ''}`}
-              onClick={() => setSelectedChat(chat.id)}
+              onClick={() => handleChatSelect(chat.sessionId)}
             >
               <div className="chat-item-header">
                 <h3>{chat.title}</h3>
