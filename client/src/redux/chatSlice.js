@@ -5,10 +5,10 @@ const BASE_URL = process.env.REACT_APP_LINK;
 
 export const getChats = createAsyncThunk(
   'chat/getChats',
-  async ({ id }, { rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
-      const result = await axios.get(`${BASE_URL}/api/chat`, { params: { id } });
-      return result.data;
+      const response = await axios.get(`${BASE_URL}/api/chat?id=${id}`);      
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -17,37 +17,91 @@ export const getChats = createAsyncThunk(
 
 export const getChatMessages = createAsyncThunk(
   'chat/getChatMessages',
-  async ({ sessionId }, { rejectWithValue }) => {
+  async ({sessionId}, { rejectWithValue }) => {
     try {
-      const result = await axios.get(`${BASE_URL}/api/chat/${sessionId}`);
-      return { sessionId, messages: result.data.messages };
+      const response = await axios.get(`${BASE_URL}/api/chat/${sessionId}`);
+      const rawMessages = response.data.messages.slice(2);      
+      return {
+        sessionId,
+        messages: rawMessages.map(msg => ({
+          id: `${sessionId}-${msg.content.slice(0, 5)}`,
+          content: msg.content,
+          isUser: msg.role === 'user',
+          parts: parseMessage(msg.content)
+        }))
+      };
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
   }
 );
 
-const initialState = {
-  chats: [],
-  activeChatMessages: [],
-  activeChatSessionId: null,
-  chatsStatus: 'idle',
-  messagesStatus: 'idle',
-  error: null,
+export const deleteMsgs = createAsyncThunk(
+  'chat/delete',
+  async () => {
+    try {
+      const response = await axios.delete(`${BASE_URL}/api/empty`);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+const parseMessage = (content) => {
+  const codeBlockRegex = /```(\w+)?\s*([\s\S]*?)```/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = codeBlockRegex.exec(content)) !== null) {
+    const [fullMatch, lang, code] = match;
+    const startIndex = match.index;
+    
+    if (startIndex > lastIndex) {
+      parts.push({
+        type: 'markdown',
+        content: content.substring(lastIndex, startIndex)
+      });
+    }
+
+    parts.push({
+      type: 'code',
+      language: lang?.trim() || 'text',
+      content: code.trim()
+    });
+
+    lastIndex = codeBlockRegex.lastIndex;
+  }
+
+  if (lastIndex < content.length) {
+    parts.push({
+      type: 'markdown',
+      content: content.substring(lastIndex)
+    });
+  }
+
+  return parts;
 };
 
-export const chatSlice = createSlice({
+const initialState = {
+  chats: null,
+  messages: null,  
+  error: null
+};
+
+const chatSlice = createSlice({
   name: 'chat',
   initialState,
   reducers: {
-    clearActiveChatMessages(state) {
-      state.activeChatMessages = [];
-      state.activeChatSessionId = null;
-      state.messagesStatus = 'idle';
-    },
+    clearActiveChatMessages: (state) => {
+      state.messages = [];
+    }
   },
   extraReducers: (builder) => {
-    	builder
+    builder
+
+
       .addCase(getChats.pending, (state) => {
         state.chatsStatus = 'loading';
       })
@@ -57,24 +111,22 @@ export const chatSlice = createSlice({
       })
       .addCase(getChats.rejected, (state, action) => {
         state.chatsStatus = 'failed';
-        state.error = action.payload;
+        state.error = action.payload.error;
       })
-      
+
+
       .addCase(getChatMessages.pending, (state) => {
-        state.messagesStatus = 'loading';
+        
       })
       .addCase(getChatMessages.fulfilled, (state, action) => {
-        state.messagesStatus = 'succeeded';
-        state.activeChatSessionId = action.payload.sessionId;
-        state.activeChatMessages = action.payload.messages;
+        state.messages = action.payload;        
       })
       .addCase(getChatMessages.rejected, (state, action) => {
-        state.messagesStatus = 'failed';
+        
         state.error = action.payload;
       });
   }
 });
 
 export const { clearActiveChatMessages } = chatSlice.actions;
-
 export default chatSlice.reducer;

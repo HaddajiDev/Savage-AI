@@ -4,7 +4,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { useSelector, useDispatch } from 'react-redux';
-import { getChats, getChatMessages } from '../redux/chatSlice';
+import { getChats, getChatMessages, clearActiveChatMessages, deleteMsgs } from '../redux/chatSlice';
 
 import '../css/Chat.css';
 
@@ -33,6 +33,8 @@ const Chat = () => {
   const [visible, setVisiblily] = useState(false);
   const messagesEndRef = useRef(null);
   const [SavageMode, setSavageMode] = useState(false);
+  const [sessionID, setSessionID] = useState(null);
+  const [loadingMsg, setLoadingMsg] = useState(false);
 
 
   const user = useSelector(state => state.user.user);
@@ -40,22 +42,33 @@ const Chat = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (user?.id) {
-      dispatch(getChats({ id: user.id }));
+    if (user) {
+      dispatch(getChats(user._id));
     }
-  }, [user, dispatch]);
+  }, [user, dispatch, messages]);
 
-  const handleChatSelect = (sessionId) => {
-    dispatch(getChatMessages({ sessionId }));
+
+  const Mymessages = useSelector(state => state.chat.messages);
+
+  const handleChatSelect = async(sessionId) => {
+    dispatch(deleteMsgs());
+    setSelectedChat(sessionId);
+    setLoadingMsg(true);
+    dispatch(clearActiveChatMessages());
+    await dispatch(getChatMessages({ sessionId: sessionId})).unwrap();     
   };
 
-  const {
-    chats,
-    activeChatMessages, 
-    activeChatSessionId,
-    chatsStatus 
-  } = useSelector(state => state.chat);
+  const chats = useSelector(state => state.chat.chats);
+  
 
+  useEffect(() => {
+    if(Mymessages){
+      dispatch(deleteMsgs());
+      setMessages(Mymessages.messages);
+      setSessionID(Mymessages.sessionID);
+      setLoadingMsg(false);
+    }    
+  }, [Mymessages])
 
   useEffect(() => {
     scrollToBottom();
@@ -147,7 +160,8 @@ const Chat = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: userMessage.content,
           username: user?.username,
-          id: user?.id,
+          id: user?._id,
+          _sessionID: sessionID ? sessionID : null,
           mode: SavageMode ? 1 : 0 })
         });
 
@@ -183,7 +197,7 @@ const Chat = () => {
     };
     
     setIsLoading(true);
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => [...(prev || []), userMessage]);
     setInput('');
 
     try {
@@ -200,7 +214,8 @@ const Chat = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input,
         username: user?.username,
-        id: user?.id,
+        id: user?._id,
+        _sessionID: sessionID ? sessionID : null,
         mode: SavageMode ? 1 : 0})
       });
 
@@ -227,17 +242,34 @@ const Chat = () => {
     }
   };
 
-  const handleNewChat = () => {
-    const newChat = {
-      id: Date.now(),
-      title: `Chat ${_chats.length + 1}`,
-      lastMessage: '',
-      timestamp: new Date().toLocaleTimeString()
-    };
-    setChats([newChat, ..._chats]);
-    setSelectedChat(newChat.id);
-    setMessages([]);
+  const handleNewChat = async () => {  
+    dispatch(clearActiveChatMessages());
+    try {
+      setIsLoading(true);
+      
+      setMessages([]);
+      setSessionID(null);
+      setSelectedChat(null);
+      
+      const response = await fetch(`${process.env.REACT_APP_LINK}/api/new-session`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user?._id })
+      });
+  
+      const data = await response.json();
+      
+      setSessionID(data.sessionId);
+      setSelectedChat(data.sessionId);
+      
+    } catch (error) {
+      console.error('Error creating new chat:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
+  
 
   const filteredChats = _chats.filter(chat =>
     chat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -254,7 +286,7 @@ const Chat = () => {
             + New Chat
           </button>
         </div>
-        <p className='disclaimer'>chat history do not work yet</p>
+        
         <div className="search-bar">
           <input
             type="text"
@@ -265,30 +297,33 @@ const Chat = () => {
         </div>
 
         <div className="chat-list">
-          {filteredChats.map(chat => (
+          {chats?.map((chat, index) => (
             <div
               key={chat.sessionId}
               className={`chat-item ${selectedChat === chat.id ? 'selected' : ''}`}
               onClick={() => handleChatSelect(chat.sessionId)}
             >
               <div className="chat-item-header">
-                <h3>{chat.title}</h3>
-                <span className="timestamp">{chat.timestamp}</span>
+                <h3>chat {index}</h3>
+                <span className="timestamp">{(() => {
+                  const date = new Date(chat.createdAt);
+                  return `${date.getDate()} / ${date.getMonth() + 1} / ${date.getFullYear()}`;
+                })()}</span>
               </div>
               <p className="last-message">
-                {chat.lastMessage || 'New chat...'}
+                {'New chat...'}
               </p>
-            </div>
-            
+            </div>  
           ))}
         </div>
       </div>)}
       <div className="main-chat-area">
-      <button className='toggle-sidebar-btn' onClick={() => setVisiblily(!visible)}>{visible ? "<" : ">"}</button>      
+      {user && (<button className='toggle-sidebar-btn' onClick={() => setVisiblily(!visible)}>{visible ? "<" : ">"}</button>)}    
         {selectedChat ? (
           <>
             <div className="chat-messages">
-              {messages.map((msg) => (
+              {loadingMsg && <>Loading</>}
+              {messages?.map((msg) => (
                 <div key={msg.id} className={`message ${msg.isUser ? 'user' : 'ai'}`}>
                   {msg.isThinking ? (
                     <div className="thinking-indicator">

@@ -1,7 +1,9 @@
 const express = require("express");
+const mongoose = require('mongoose');
 const router = express.Router();
 const { OpenAI } = require('openai');
 const ChatHistory = require('../models/history');
+const { v4: uuidv4 } = require('uuid');
 
 const openai = new OpenAI({
   baseURL: process.env.BASE_URL,
@@ -39,15 +41,15 @@ function getModeContext(history, currentMode) {
 
 router.post('/chat', async (req, res) => {
   try {
-    const { message, mode, username, id } = req.body;
-    const sessionId = req.sessionID;
+    const { message, mode, username, id, _sessionID } = req.body;
+    const sessionId =  _sessionID || req.sessionID;
 
     if (!message?.trim()) {
       return res.status(400).json({ error: "Message is required" });
     }
 
     let chatHistory = await ChatHistory.findOne({ sessionId }) || 
-      new ChatHistory({ sessionId, messages: [], userId: id === 'undefined' ? "" : id });
+      new ChatHistory({ sessionId, messages: [], userId: id });
 
     const SYSTEM_PROMPT = mode === 1 
       ? process.env.SAVAGE_PROMPT 
@@ -81,7 +83,7 @@ router.post('/chat', async (req, res) => {
 
     await ChatHistory.findOneAndUpdate(
       { sessionId },
-      { messages: trimmedMessages },
+      { messages: trimmedMessages, userId: id },
       { upsert: true, new: true }
     );
 
@@ -92,19 +94,39 @@ router.post('/chat', async (req, res) => {
   }
 });
 
-router.get('/chat', async(req, res) => {
-  const { id } = req.body;
-
+router.post('/new-session', async (req, res) => {
   try {
-    if (!id) return res.status(404).send({ error: 'user not found' });
-    const chats = await ChatHistory.find({userId: id});
-    res.status(200).send({chats: chats});
+    const { userId } = req.body;
+    
+    const newChat = new ChatHistory({
+      sessionId: uuidv4(),
+      userId,
+      messages: [],
+      createdAt: new Date()
+    });
+
+    await newChat.save();
+    
+    res.status(201).json({
+      sessionId: newChat.sessionId,
+      createdAt: newChat.createdAt
+    });
   } catch (error) {
-    console.log(error);
-    res.status(400).send({error: error});
+    console.error('Session creation error:', error);
+    res.status(500).json({ error: 'Failed to create new session' });
   }
 });
 
+router.get('/chat', async (req, res) => {
+  const { id } = req.query;
+  try {    
+    const chats = await ChatHistory.find({ userId: new mongoose.Types.ObjectId(id) });
+    res.status(200).send({ chats });
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({ error: error });
+  }
+});
 
 router.get('/chat/:sessionId', async (req, res) => {
   const { sessionId } = req.params;
@@ -117,5 +139,19 @@ router.get('/chat/:sessionId', async (req, res) => {
     res.status(400).send({ error: error.message });
   }
 });
+
+router.delete('/empty', async (req, res) => {
+  try {
+    const result = await ChatHistory.deleteMany({
+      messages: { $size: 0 }
+    });
+
+    res.status(200).json({ message: 'Deleted empty chat histories', deletedCount: result.deletedCount });
+  } catch (error) {
+    console.error('Error deleting empty chat histories:', error);
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+});
+
 
 module.exports = router;
