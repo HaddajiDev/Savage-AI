@@ -60,6 +60,14 @@ const Chat = () => {
 
   const chats = useSelector(state => state.chat.chats);
   
+  useEffect(() => {
+    if (Mymessages?.sessionID) {
+      const lastSystemMessage = Mymessages.messages.findLast(msg => 
+        msg.role === 'system' && msg.content.includes('SAVAGE')
+      );
+      setSavageMode(!!lastSystemMessage);
+    }
+  }, [Mymessages]);
 
   useEffect(() => {
     if(Mymessages){
@@ -360,7 +368,7 @@ const Chat = () => {
                         )
                       ))}
 
-                      {!msg.isUser && (
+                      {!msg.isUser && msg.content === "AI service unavailable" && (
                         <div className="message-actions">
                           <button
                             className="action-btn regenerate-btn"
@@ -396,7 +404,7 @@ const Chat = () => {
                     <button 
                       type="button" 
                       className={`skull-button ${SavageMode ? 'active' : ''}`}
-                      onClick={() => setSavageMode(!SavageMode)}
+                      onClick={() => setSavageMode(prev => !prev)}
                     >
                     Savage Mode 💀
                   </button>

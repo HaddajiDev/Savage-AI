@@ -22,7 +22,7 @@ export const getChatMessages = createAsyncThunk(
       const response = await axios.get(`${BASE_URL}/api/chat/${sessionId}`);
       const rawMessages = response.data.messages.slice(2);      
       return {
-        sessionId,
+        sessionID: response.data.sessionID,
         messages: rawMessages.map(msg => ({
           id: `${sessionId}-${msg.content.slice(0, 5)}`,
           content: msg.content,
@@ -119,8 +119,11 @@ const chatSlice = createSlice({
         
       })
       .addCase(getChatMessages.fulfilled, (state, action) => {
-        state.messages = action.payload;        
-      })
+        state.messages = {
+          sessionID: action.payload.sessionID,
+          messages: action.payload.messages
+        };
+        })
       .addCase(getChatMessages.rejected, (state, action) => {
         
         state.error = action.payload;

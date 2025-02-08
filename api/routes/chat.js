@@ -94,6 +94,7 @@ router.post('/chat', async (req, res) => {
   }
 });
 
+
 router.post('/new-session', async (req, res) => {
   try {
     const { userId } = req.body;
@@ -133,7 +134,7 @@ router.get('/chat/:sessionId', async (req, res) => {
   try {
     const chat = await ChatHistory.findOne({ sessionId });
     if (!chat) return res.status(404).send({ error: 'Chat not found' });
-    res.status(200).send({ messages: chat.messages });
+    res.status(200).send({ messages: chat.messages, sessionID: chat.sessionId });
   } catch (error) {
     console.error(error);
     res.status(400).send({ error: error.message });
