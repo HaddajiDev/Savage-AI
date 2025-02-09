@@ -455,3 +455,42 @@
 .skull-button:hover {
   background: var(--hover-bg) !important;
 }
+
+
+
+
+
+
+
+
+
+
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  position: relative;
+  animation: spinnerRotate 2s linear infinite;
+}
+
+.spinner-inner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 3px solid transparent;
+  border-top-color: #646cff;
+  border-radius: 50%;
+  animation: spinnerSpin 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes spinnerSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

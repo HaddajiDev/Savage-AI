@@ -254,7 +254,6 @@ const Chat = () => {
     dispatch(clearActiveChatMessages());
     try {
       setIsLoading(true);
-      
       setMessages([]);
       setSessionID(null);
       setSelectedChat(null);
@@ -266,8 +265,9 @@ const Chat = () => {
         body: JSON.stringify({ userId: user?._id })
       });
   
-      const data = await response.json();
+      if (!response.ok) throw new Error('Failed to create new session');
       
+      const data = await response.json();
       setSessionID(data.sessionId);
       setSelectedChat(data.sessionId);
       
@@ -417,7 +417,11 @@ const Chat = () => {
           </>
         ) : (
           <div className="empty-state">
-            <h3>Select a chat or start a new conversation</h3>
+            <div className="spinner-container">
+              <div className="spinner">
+                <div className="spinner-inner"></div>
+              </div>
+            </div>
           </div>
         )}
       </div>
