@@ -68,6 +68,10 @@ router.post('/chat', async (req, res) => {
     }
 
     const completion = await openai.chat.completions.create({
+      extra_headers : {
+        "HTTP-Referer": `https://savageai.vercel.app`,
+        "X-Title": "Savage AI",
+      },
       model: process.env.MODEL,
       messages
     });
