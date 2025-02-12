@@ -330,7 +330,13 @@ const Chat = () => {
         {selectedChat ? (
           <>
             <div className="chat-messages">
-              {loadingMsg && <>Loading</>}
+              {loadingMsg && <div className="empty-state">
+                <div className="spinner-container">
+                  <div className="spinner">
+                    <div className="spinner-inner"></div>
+                  </div>
+                </div>
+              </div>}
               {messages?.map((msg) => (
                 <div key={msg.id} className={`message ${msg.isUser ? 'user' : 'ai'}`}>
                   {msg.isThinking ? (
