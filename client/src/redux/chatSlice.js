@@ -17,10 +17,16 @@ export const getChats = createAsyncThunk(
 
 export const getChatMessages = createAsyncThunk(
   'chat/getChatMessages',
-  async ({sessionId}, { rejectWithValue }) => {
+  async ({ sessionId }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${BASE_URL}/api/chat/${sessionId}`);
-      const rawMessages = response.data.messages.slice(2);      
+      const rawMessages = response.data.messages
+        .slice(2)
+        .filter(msg => 
+          msg.content !== "[System: Conversation mode changed to FRIENDLY]" &&
+          msg.content !== "[System: Conversation mode changed to SAVAGE]"
+        );
+      
       return {
         sessionID: response.data.sessionID,
         messages: rawMessages.map(msg => ({
