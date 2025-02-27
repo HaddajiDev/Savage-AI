@@ -41,7 +41,7 @@ function getModeContext(history, currentMode) {
 
 router.post('/chat', async (req, res) => {
   try {
-    const { message, mode, username, id, _sessionID } = req.body;
+    const { message, mode, id, _sessionID } = req.body;
     const sessionId =  _sessionID || req.sessionID;
 
     if (!message?.trim()) {
@@ -60,7 +60,7 @@ router.post('/chat', async (req, res) => {
     const messages = [
       { role: "system", content: SYSTEM_PROMPT },
       ...modeContext,
-      { role: "user", content: username !== 'undefined' ? `${message} username=${username}` : message }
+      { role: "user", content: message }
     ];
 
     if (messages.length > 20) {

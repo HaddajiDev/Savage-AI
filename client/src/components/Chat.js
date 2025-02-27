@@ -166,8 +166,7 @@ const Chat = () => {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userMessage.content,
-          username: user?.username,
+          body: JSON.stringify({ message: userMessage.content,          
           id: user?._id,
           _sessionID: sessionID ? sessionID : null,
           mode: SavageMode ? 1 : 0 })
@@ -221,7 +220,6 @@ const Chat = () => {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input,
-        username: user?.username,
         id: user?._id,
         _sessionID: sessionID ? sessionID : null,
         mode: SavageMode ? 1 : 0})
